@@ -22,8 +22,14 @@ ROOT = Path(__file__).resolve().parents[1]
 def load_results() -> list[dict]:
     rows = []
     for path in sorted((ROOT / "results").rglob("*.json")):
+        if path.parent.name == "fingerprint":
+            continue
         r = json.loads(path.read_text())
+        if "tag" not in r:  # fingerprint files
+            continue
         site, partition, workload, _rep = r["tag"].split("/")
+        if workload.endswith("-smoke") or partition.startswith(("diag_", "genoa_mkl5")):
+            continue
         r.update(site=site, partition=partition, bench=workload)
         # MACE: time for 1 ns; VASP: LOOP+ real time (set by parse_vasp.py)
         r["time_s"] = r["time_to_1ns_s"] if "time_to_1ns_s" in r else r["time_s"]
