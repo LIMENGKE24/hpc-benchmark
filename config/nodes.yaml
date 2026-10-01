@@ -1,0 +1,38 @@
+# Partition inventory, collected 2026-10-01. Hardware is re-checked from job logs (lscpu / nvidia-smi).
+china:                       # Slurm, ssh alias `china` (hpc.chinahpc.com:1014), account dengzy
+  scheduler: slurm
+  workdir: /ssd/work/limengke/hpc-benchmark
+  partitions:
+    p1:      {kind: cpu, cores: 40, mem_gb: 190, cpu: "Xeon Gold 6138"}
+    "9242":  {kind: cpu, cores: 96, mem_gb: 378, cpu: "Xeon Platinum 9242"}
+    48cp1:   {kind: cpu, cores: 48, mem_gb: 190, cpu: "Xeon Platinum 8163"}
+    48cp2:   {kind: cpu, cores: 48, mem_gb: 190, cpu: "Xeon Platinum 8255C"}
+    48cp3:   {kind: cpu, cores: 48, mem_gb: 190, cpu: "Xeon Platinum 8168"}
+    v100:    {kind: gpu, cores: 24, gpus: 8, gpu: "V100 16GB SXM2", mem_gb: 250}
+    v100g32: {kind: gpu, cores: 24, gpus: 8, gpu: "V100 32GB SXM2", mem_gb: 250}
+  vasp:
+    cpu: "module load vasp-intel2024.2/6.5.1"
+    gpu: "module load vasp/6.5.1-nvhpc"
+
+vanda:                       # PBS Pro, project CFP03-CF-027
+  scheduler: pbs
+  workdir: /scratch/projects/CFP03/CFP03-CF-027/limengke/hpc-benchmark
+  partitions:
+    batch_cpu: {kind: cpu, cores: 72, mem_gb: 512, select: "select=1:ncpus=72:mpiprocs=72:mem=480gb"}
+    batch_gpu: {kind: gpu, cores: 36, gpus: 2, gpu: "A40 48GB", select: "select=1:ncpus=8:ngpus=1:mem=64gb"}
+    # free (queue_charge_rate=0) reference points:
+    cpu_parallel: {kind: cpu, cores: 72, note: "max 160 cores, free"}
+    gpu:          {kind: gpu, gpus: 2, gpu: "A40 48GB", note: "free"}
+  vasp:
+    cpu: "module load openmpi intel/2023b; VASP=/home/svu/limengke/bin/vasp.6.5.1"
+
+fornax:                      # PBS Pro, queue-routed, no project code, max 72 h
+  scheduler: pbs
+  workdir: /scratch/li.mengke/hpc-benchmark
+  partitions:
+    genoa:    {kind: cpu, cores: 64, mem_gb: 384, select: "select=1:ncpus=64:mpiprocs=64", place: excl}
+    largemem: {kind: cpu, cores: 128, mem_gb: 512, select: "select=1:ncpus=128:mpiprocs=128", place: excl}
+    rtx5090:  {kind: gpu, cores: 32, gpus: 1, gpu: "RTX 5090 32GB", select: "select=1:ncpus=32", place: excl}
+  vasp:
+    cpu: "module load vasp/vasp.6.5.1"
+    gpu: "module load vasp/vasp.6.5.1_nvhpc"

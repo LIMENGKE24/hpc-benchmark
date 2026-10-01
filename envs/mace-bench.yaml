@@ -1,0 +1,15 @@
+# Identical MACE env for all sites. Build on vanda, then:
+#   conda pack -n mace-bench -o mace-bench.tar.gz   (scp to fornax / china, untar, conda-unpack)
+name: mace-bench
+channels: [conda-forge]
+dependencies:
+  - python=3.11
+  - pip
+  - conda-pack
+  - pip:
+      - --extra-index-url https://download.pytorch.org/whl/cu128
+      - torch==2.8.0+cu128      # covers sm_70 (V100), sm_86 (A40), sm_120 (RTX 5090); TODO verify
+      - mace-torch==0.3.15
+      - ase==3.25.0
+      - numpy<2.3
+      - pyyaml

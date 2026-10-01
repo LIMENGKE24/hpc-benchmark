@@ -1,0 +1,8 @@
+POTCAR
+*.tar.gz
+__pycache__/
+*.model
+WAVECAR
+CHGCAR
+vasprun.xml
+*.traj

@@ -1,0 +1,172 @@
+# HPC Benchmark — time vs. cost Pareto front
+
+Benchmark every CPU and GPU node type we can use on **China HPC (超算云平台)**, **vanda** and **fornax**
+with *identical* VASP and MACE-MD workloads, then plot **time-to-solution vs. cost per job** to find the
+Pareto-optimal nodes (fastest for a given cost / cheapest for a given speed).
+
+> Status: **preliminary plan (2026-10-01)** — nothing has been run yet. Items marked **TODO** / **DECIDE**
+> need input before production runs.
+
+---
+
+## 1. Node inventory (what gets benchmarked)
+
+Collected 2026-10-01 from `sinfo` / `pbsnodes` / `qstat -Q`. Full machine-readable list: [`config/nodes.yaml`](config/nodes.yaml).
+
+| Site | Partition / queue | Hardware (per node) | VASP | MACE |
+|---|---|---|---|---|
+| China HPC (Inner Mongolia 2) | `p1` | 2× Xeon Gold 6138, 40 c, 190 GB | CPU | CPU |
+| China HPC | `9242` | 2× Xeon Platinum 9242, 96 c, 378 GB | CPU | CPU |
+| China HPC | `48cp1` | Xeon Platinum 8163, 48 c, 190 GB | CPU | CPU |
+| China HPC | `48cp2` | Xeon Platinum 8255C, 48 c, 190 GB | CPU | CPU |
+| China HPC | `48cp3` | Xeon Platinum 8168, 48 c, 190 GB | CPU | CPU |
+| China HPC | `v100` | 8× V100 16 GB, 24 c | GPU (nvhpc) | GPU |
+| China HPC | `v100g32` | 8× V100 32 GB, 24 c | GPU (nvhpc) | GPU |
+| vanda | `batch_cpu` (cn-*) | 72 c, 512 GB | CPU | CPU |
+| vanda | `batch_gpu` (gn-a40-*) | 2× A40 48 GB | — (no GPU VASP build) | GPU |
+| fornax | `genoa` | AMD EPYC (Genoa), 64 c, 384–512 GB | CPU | CPU |
+| fornax | `largemem` | 128 c, 512 GB | CPU | CPU |
+| fornax | `rtx5090` | 1× RTX 5090 32 GB, 32 c, 64 GB | GPU (nvhpc) | GPU |
+
+Not included (no access from our account / disabled): China `p1shr`, `fat`, `fat2`, `v100g32fat`
+(we are not in those Slurm groups); fornax `v100` (queue stopped), `dev`; vanda `large_mem` (ACL).
+Tianjin Region 1 (`tj1.chinahpc.com`) uses a separate key — **optional phase 2**.
+
+Exact CPU/GPU models are **recorded automatically** by every job (`lscpu`, `nvidia-smi`), so the table
+above will be corrected from real job output.
+
+---
+
+## 2. Benchmark workloads
+
+All workloads use the **same structure family: cubic Na₃PS₄** (already used in the group's MACE work on
+fornax, so results are directly relevant).
+
+### W1 — VASP single-point SCF (fixed work)
+
+| Setting | Value |
+|---|---|
+| Structure | c-Na₃PS₄ 2×2×2 supercell, **128 atoms** |
+| Version | **VASP 6.5.1** on every site (only version present on all three) |
+| Functional / PP | PBE, PAW `Na_pv P S` — **one POTCAR file copied to all sites** (md5 checked) |
+| ENCUT / PREC | 520 eV / Normal, `ALGO = Normal`, `LREAL = Auto` |
+| k-points | Γ-centred 2×2×2 |
+| Fixed work | `NSW = 0`, `NELMIN = NELM = 25`, `EDIFF = 1E-10` → exactly 25 SCF steps on every machine |
+| Output | `LWAVE = LCHARG = .FALSE.` (no I/O noise) |
+| Parallel | 1 full node, all physical cores, `KPAR = 1`, `NCORE = 4` (CPU); 1 rank/GPU, `NCORE = 1` (GPU) |
+| Metric | `Elapsed time` from OUTCAR + energy check (all sites must agree to < 1 meV/atom) |
+
+Optional **W1-large**: 3×3×3 supercell (432 atoms, Γ-only) to test scaling on fat nodes / multi-GPU.
+
+### W2 — MACE MD (fixed work)
+
+| Setting | Value |
+|---|---|
+| Model | **MACE-MPA-0 medium** (`mace-mpa-0-medium.model`, md5 pinned) |
+| Code | **mace-torch 0.3.15**, float32, identical conda-packed env on all sites (see §3) |
+| Ensemble | NVT Langevin, 600 K, 1 fs, seed fixed |
+| Sizes | **S**: 4×4×4 = 1 024 atoms; **L**: 10×10×10 = 16 000 atoms (GPU only) |
+| Steps | 200 warm-up (untimed) + 2 000 timed (GPU); 20 + 100 timed (CPU, size S only) |
+| Parallel | GPU: 1 GPU, 8 CPU threads; CPU: full node, `torch.set_num_threads(cores)` |
+| Metric | timed steps/s → **ns/day** and **time for 1 ns** |
+
+### Repetition & fairness rules
+
+- **3 replicates** per (partition × workload), on different nodes where possible; report the median and
+  min–max.
+- Exclusive nodes (`--exclusive` / `place=excl`) so neighbours don't affect timings.
+- Every job logs hostname, `lscpu`, `nvidia-smi`, module list, binary md5, env fingerprint.
+- Queue wait time is recorded but **not** included in time-to-solution (reported separately).
+
+---
+
+## 3. Keeping software identical across the three clusters
+
+### VASP
+
+- **Track A (primary — "what users actually get")**: the site-provided VASP 6.5.1 build:
+  - vanda: `~/bin/vasp.6.5.1/` (Intel 2023b + OpenMPI, self-compiled)
+  - fornax: `module load vasp/vasp.6.5.1` (CPU), `vasp/vasp.6.5.1_nvhpc` (RTX 5090)
+  - China: `module load vasp-intel2024.2/6.5.1` (CPU), `vasp/6.5.1-nvhpc` (V100)
+- **Track B (optional — "same binary recipe")**: compile the same VASP 6.5.1 source
+  (`vasp.6.5.1_intel2023b.tar.gz` from vanda) with the same `makefile.include` on each site, to separate
+  hardware speed from compiler/MPI differences. Only if Track A shows surprising gaps.
+- Same INCAR / KPOINTS / POSCAR / POTCAR everywhere (md5 listed in `inputs/vasp/MD5SUMS`).
+
+### MACE
+
+- One environment spec ([`envs/mace-bench.yaml`](envs/mace-bench.yaml)): Python 3.11, **torch 2.8.0 + cu128**,
+  mace-torch 0.3.15, ase 3.25.
+  - torch 2.8 cu128 wheels cover V100 (sm_70), A40 (sm_86) and RTX 5090 (sm_120). CUDA 13 wheels dropped
+    Volta, so we must **not** use the cu130 build fornax currently uses. **TODO: verify on all three GPU types.**
+- **China HPC has no outbound internet** (no PyPI access) → build once on vanda, `conda-pack` it, `scp`
+  the tarball to fornax and China, unpack to the same relative path.
+- `inputs/mace/fingerprint.py` prints versions + model md5 + reference energy/forces for a fixed
+  structure; the outputs must agree across sites before any timing runs.
+
+---
+
+## 4. Cost model
+
+`cost_per_job = rate(unit · h) × units_used × wall_hours`, all converted to **SGD** — rates live in
+[`config/pricing.yaml`](config/pricing.yaml). **All rates are TODO.**
+
+| Site | Charging unit | Source of rate |
+|---|---|---|
+| China HPC | credits per core-hour (CPU) / per GPU-hour, per partition | portal price list (CNY → SGD) |
+| vanda | SU per core-hour / GPU-hour (`queue_charge_rate`) | NUS HPC rate card / `hpc project` |
+| fornax | group-owned | **DECIDE**: amortised hardware cost, or treat as 0 and report separately |
+
+Note: vanda's `cpu_parallel` and `gpu` queues have `queue_charge_rate = 0` (free, but capped at
+160 cores / 36 cores + 2 GPUs). They can go on the plot as zero-cost reference points.
+
+---
+
+## 5. Pareto front
+
+- One panel per workload (W1 VASP, W2-S, W2-L).
+- x = time-to-solution (s, log scale), y = cost per job (SGD, log scale).
+- Non-dominated points (nothing is both faster and cheaper) are joined as the Pareto front and labelled.
+- Script: [`analysis/pareto.py`](analysis/pareto.py) reads `results/**/*.json`.
+
+---
+
+## 6. Plan / milestones
+
+| # | Step | Where | Status |
+|---|---|---|---|
+| 0 | Access + inventory of all partitions | all | ✅ done (2026-10-01) |
+| 1 | Build structures, POTCAR, INCAR; record md5s | vanda | ⬜ |
+| 2 | Build `mace-bench` env, conda-pack, distribute | vanda → fornax, China | ⬜ |
+| 3 | Run `fingerprint.py` on one node per GPU type + CPU; confirm identical energies | all | ⬜ |
+| 4 | Smoke test: 1 short run per partition (W1 with NELM=3, W2 with 50 steps) | all | ⬜ |
+| 5 | Fill in `pricing.yaml` | — | ⬜ |
+| 6 | Production: 3 replicates × all partitions × W1/W2 | all | ⬜ |
+| 7 | Collect results, plot Pareto front, write summary | local | ⬜ |
+
+Rough compute budget: W1 ≈ 0.2–1 node-h per run → ~12 partitions × 3 reps ≈ 20 node-h;
+W2 ≈ < 0.5 GPU-h per run. Small enough to finish in about 1 week including queue time.
+
+---
+
+## 7. Open decisions
+
+1. **System**: c-Na₃PS₄ OK, or use a different group system (e.g. a MOF or slab)?
+2. **fornax cost**: amortised hardware cost or zero?
+3. **VASP GPU** on V100 / RTX 5090: include? (Consumer RTX 5090 FP64 is weak — useful as a data point.)
+4. **Tianjin Region 1**: include in phase 1 or later?
+5. **Multi-node** scaling (2–4 nodes) — out of scope for v1?
+
+---
+
+## Repository layout
+
+```
+config/nodes.yaml        partition inventory + scheduler resource strings
+config/pricing.yaml      cost rates (TODO)
+envs/mace-bench.yaml     pinned MACE environment
+inputs/vasp/             INCAR, KPOINTS (POSCAR/POTCAR generated in step 1)
+inputs/mace/             bench_md.py, fingerprint.py
+analysis/pareto.py       collect results + Pareto plot
+results/<site>/<partition>/<workload>/<run>.json
+```

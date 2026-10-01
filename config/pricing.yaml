@@ -1,0 +1,20 @@
+# Cost rates. cost_per_job = rate * units * wall_hours, converted to SGD.
+# unit: core_hour | gpu_hour | node_hour.  ALL VALUES TODO.
+fx_to_sgd: {CNY: null, SGD: 1.0}
+china:
+  p1:      {unit: core_hour, rate: null, currency: CNY}
+  "9242":  {unit: core_hour, rate: null, currency: CNY}
+  48cp1:   {unit: core_hour, rate: null, currency: CNY}
+  48cp2:   {unit: core_hour, rate: null, currency: CNY}
+  48cp3:   {unit: core_hour, rate: null, currency: CNY}
+  v100:    {unit: gpu_hour,  rate: null, currency: CNY}
+  v100g32: {unit: gpu_hour,  rate: null, currency: CNY}
+vanda:
+  batch_cpu:    {unit: core_hour, rate: null, currency: SGD}
+  batch_gpu:    {unit: gpu_hour,  rate: null, currency: SGD}
+  cpu_parallel: {unit: core_hour, rate: 0.0,  currency: SGD}
+  gpu:          {unit: gpu_hour,  rate: 0.0,  currency: SGD}
+fornax:   # DECIDE: amortised hardware cost or 0
+  genoa:    {unit: node_hour, rate: null, currency: SGD}
+  largemem: {unit: node_hour, rate: null, currency: SGD}
+  rtx5090:  {unit: gpu_hour,  rate: null, currency: SGD}

@@ -1,0 +1,17 @@
+SYSTEM  = c-Na3PS4 2x2x2 benchmark (fixed 25 SCF steps)
+PREC    = Normal
+ENCUT   = 520
+ALGO    = Normal
+LREAL   = Auto
+ISMEAR  = 0
+SIGMA   = 0.05
+ISPIN   = 1
+NSW     = 0
+IBRION  = -1
+NELM    = 25
+NELMIN  = 25
+EDIFF   = 1E-10
+LWAVE   = .FALSE.
+LCHARG  = .FALSE.
+KPAR    = 1
+NCORE   = 4        # set to 1 for GPU (nvhpc/OpenACC) builds
