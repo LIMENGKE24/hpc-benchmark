@@ -6,7 +6,7 @@
 #PBS -l walltime=04:00:00
 #PBS -j oe
 # genoa:    qsub -o logs/ -v W=W1|W2,REP=N,PART=genoa jobs/fornax/cpu.pbs
-# pin a node: qsub -l select=1:ncpus=64:mpiprocs=64:host=fornax-c13 -v ...,PART=genoa_c13 jobs/fornax/cpu.pbs
+# pin a node (use vnode=, NOT host= — CPU hosts are named fornax-cNN-ib0): qsub -l select=1:ncpus=64:mpiprocs=64:vnode=fornax-c13 -v ...,PART=genoa_c13 jobs/fornax/cpu.pbs
 # largemem: qsub -q largemem -l select=1:ncpus=128:mpiprocs=128 -o logs/ -v W=W1|W2,REP=N,PART=largemem jobs/fornax/cpu.pbs
 : "${W:?-v W=W1|W2}" "${REP:?-v REP=N}" "${PART:?-v PART=genoa|largemem}"
 REPO=$PBS_O_WORKDIR SITE=fornax
