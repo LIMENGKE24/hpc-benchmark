@@ -15,17 +15,18 @@ Collected 2026-10-01 from `sinfo` / `pbsnodes` / `qstat -Q`. Full machine-readab
 
 | Site | Partition / queue | Hardware (per node) | VASP | MACE |
 |---|---|---|---|---|
-| China HPC (Inner Mongolia 2) | `p1` | 2× Xeon Gold 6138, 40 c, 190 GB | CPU | CPU |
-| China HPC | `9242` | 2× Xeon Platinum 9242, 96 c, 378 GB | CPU | CPU |
-| China HPC | `48cp1` | Xeon Platinum 8163, 48 c, 190 GB | CPU | CPU |
-| China HPC | `48cp2` | Xeon Platinum 8255C, 48 c, 190 GB | CPU | CPU |
-| China HPC | `48cp3` | Xeon Platinum 8168, 48 c, 190 GB | CPU | CPU |
+| China HPC (Inner Mongolia 2) | `p1` | 2× Xeon Gold 6138, 40 c, 190 GB | CPU | — |
+| China HPC | `9242` | 2× Xeon Platinum 9242, 96 c, 378 GB | CPU | — |
+| China HPC | `48cp1` | Xeon Platinum 8163, 48 c, 190 GB | CPU | — |
+| China HPC | `48cp2` | Xeon Platinum 8255C, 48 c, 190 GB | CPU | — |
+| China HPC | `48cp3` | Xeon Platinum 8168, 48 c, 190 GB | CPU | — |
 | China HPC | `v100` | 8× V100 16 GB, 24 c | GPU (nvhpc) | GPU |
 | China HPC | `v100g32` | 8× V100 32 GB, 24 c | GPU (nvhpc) | GPU |
-| vanda | `batch_cpu` (cn-*) | 72 c, 512 GB | CPU | CPU |
+| vanda | `batch_cpu` (cn-*) | 72 c, 512 GB | CPU | — |
 | vanda | `batch_gpu` (gn-a40-*) | 2× A40 48 GB | — (no GPU VASP build) | GPU |
-| fornax | `genoa` | AMD EPYC (Genoa), 64 c, 384–512 GB | CPU | CPU |
-| fornax | `largemem` | 128 c, 512 GB | CPU | CPU |
+| fornax | `genoa_9354` (c16–c20; c15 excluded) | 2× AMD EPYC 9354, 64 c, 384 GB | CPU | — |
+| fornax | `genoa_7543` (c13) | 2× AMD EPYC 7543, 64 c, 512 GB | CPU | — |
+| fornax | `largemem` | 128 c, 512 GB | CPU | — |
 | fornax | `rtx5090` | 1× RTX 5090 32 GB, 32 c, 64 GB | GPU (nvhpc) | GPU |
 | hopper | `h100` (4 nodes) | 8× H100, 112 c, 2 TB | — (no VASP on hopper) | GPU |
 | hopper | `h200` (40 nodes) | 8× H200, 112 c, 2 TB | — (no VASP on hopper) | GPU |
@@ -69,8 +70,8 @@ Optional **W1-large**: 3×3×3 supercell (432 atoms, Γ-only) to test scaling on
 | Code | **mace-torch 0.3.15**, float32, identical conda-packed env on all sites (see §3) |
 | Ensemble | NVT Langevin, 600 K, 1 fs, seed fixed |
 | Sizes | **S**: 4×4×4 = 1 024 atoms; **L**: 6×6×6 = 3 456 atoms (GPU only; 16 000 atoms ran out of memory on the 48 GB A40, and L must fit a 16 GB V100) |
-| Steps | S: 200 warm-up + 2 000 timed; L: 100 + 1 000 timed (GPU); CPU: 20 + 100 timed, size S only |
-| Parallel | GPU: 1 GPU, 8 CPU threads; CPU: full node, `torch.set_num_threads(cores)` |
+| Steps | S: 200 warm-up + 2 000 timed; L: 100 + 1 000 timed |
+| Parallel | 1 GPU, 8 CPU threads (China V100: 3 = 24 cores / 8 GPUs). **GPU only — no CPU MACE benchmark** |
 | GPUs | China V100 ×2 types, vanda A40, fornax RTX 5090, **hopper H100 and H200** |
 | Variant | **W2-cueq** (optional): same run with cuEquivariance kernels on GPUs that support them (A40, RTX 5090, H100, H200; V100 likely unsupported) |
 | Metric | timed steps/s → **ns/day** and **time for 1 ns** |
@@ -233,19 +234,13 @@ Regenerate: `analysis/collect.sh && python analysis/pareto.py && python analysis
 | `china/v100` | 41.6 | 7.86 | 3 | ★ |
 | `china/v100g32` | 43.3 | 8.18 | 3 |  |
 | `vanda/batch_gpu` | 47 | 28.2 | 3 |  |
-| `vanda/batch_cpu` | 225 | 162 | 3 |  |
-| `china/48cp2` | 854 | 775 | 3 |  |
-| `china/48cp3` | 921 | 836 | 3 |  |
-| `china/9242` | 992 | 1.8e+03 | 3 |  |
-| `china/p1` | 1.04e+03 | 783 | 3 |  |
-| `china/48cp1` | 1.17e+03 | 1.06e+03 | 3 |  |
 
 **Takeaways (preliminary)**
 - **VASP**: China `v100` (1 GPU, nvhpc build) is both fastest and cheapest for this 128-atom SCF.
   Among CPU nodes, vanda (72 c) is fastest and ~3× cheaper per job than any China CPU partition.
 - **MACE**: fornax RTX 5090 is fastest at both sizes; China V100 is cheapest.
   H100/H200 are about as fast as the RTX 5090 but ~5× the cost per ns (no cuEquivariance; small systems).
-- CPU nodes are 20–60× slower than GPUs for MACE MD and not competitive on cost.
+- MACE MD is benchmarked on GPUs only (CPU nodes dropped from W2 on 2026-10-01).
 - Energies agree across sites: VASP −526.017345 eV on every CPU/GPU build; MACE fingerprint to 1e-13 eV.
 
 ---

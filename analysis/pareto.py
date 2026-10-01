@@ -30,6 +30,8 @@ def load_results() -> list[dict]:
         site, partition, workload, _rep = r["tag"].split("/")
         if workload.endswith("-smoke") or partition.startswith(("diag_", "genoa_mkl5")):
             continue
+        if r.get("workload") == "mace_md" and r.get("device") == "cpu":  # MACE is benchmarked on GPUs only
+            continue
         r.update(site=site, partition=partition, bench=workload)
         # MACE: time for 1 ns; VASP: LOOP+ real time (set by parse_vasp.py)
         r["time_s"] = r["time_to_1ns_s"] if "time_to_1ns_s" in r else r["time_s"]

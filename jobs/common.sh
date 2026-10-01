@@ -38,7 +38,6 @@ run_w2() {
         L) sc="6 6 6";    warm=100; steps=1000 ;;   # 3456 atoms: largest that fits a 16 GB V100
         *) echo "bad SIZE $size" >&2; exit 2 ;;
     esac
-    if [ "$device" = cpu ]; then warm=20; steps=100; fi
     if [ "$SMOKE" = 1 ]; then warm=5; steps=20; fi
     _rundir W2-$size
     export OMP_NUM_THREADS=$threads MKL_NUM_THREADS=$threads PYTHONUNBUFFERED=1 TORCH_FORCE_NO_WEIGHTS_ONLY_LOAD=1
