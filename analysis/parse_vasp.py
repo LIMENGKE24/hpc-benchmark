@@ -43,7 +43,7 @@ def main() -> None:
         "toten_eV": energy,
         "toten_eV_per_atom": energy / natoms if energy is not None and natoms else None,
         "vasp_version": grab(r"(vasp\.\d+\.\d+\.\d+)", outcar, str, last=False),
-        "mpi_ranks": grab(r"running\s+(?:on\s+)?(\d+)\s+total cores", outcar, int, last=False),
+        "mpi_ranks": grab(r"running\s+(\d+)\s+mpi-ranks", outcar, int, last=False),
         "host": socket.gethostname(),
     }
     args.out.parent.mkdir(parents=True, exist_ok=True)

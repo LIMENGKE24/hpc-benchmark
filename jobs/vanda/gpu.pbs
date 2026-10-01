@@ -1,0 +1,13 @@
+#!/bin/bash
+#PBS -N bench-vanda-a40
+#PBS -P CFP05-CF-241
+#PBS -l select=1:ncpus=8:ngpus=1:mem=64gb
+#PBS -l walltime=03:00:00
+#PBS -j oe
+# qsub -o logs/ -v SIZE=S|L|FP,REP=N[,SMOKE=1] jobs/vanda/gpu.pbs
+# free queue: qsub -q gpu -o logs/ -v SIZE=S,REP=N,PART=gpu jobs/vanda/gpu.pbs
+: "${SIZE:?-v SIZE=S|L|FP}" "${REP:=1}"
+REPO=$PBS_O_WORKDIR SITE=vanda PART=${PART:-batch_gpu}
+PY=/scratch/projects/CFP05/CFP05-CF-241/limengke/envs/mace-bench/bin/python
+source "$REPO/jobs/common.sh"
+if [ "$SIZE" = FP ]; then run_fingerprint vanda_a40; else run_w2 "$SIZE" cuda 8 1; fi

@@ -1,0 +1,19 @@
+#!/bin/bash --login
+#PBS -N bench-fornax-cpu
+#PBS -q genoa
+#PBS -l select=1:ncpus=64:mpiprocs=64
+#PBS -l place=excl
+#PBS -l walltime=04:00:00
+#PBS -j oe
+# genoa:    qsub -o logs/ -v W=W1|W2,REP=N,PART=genoa jobs/fornax/cpu.pbs
+# largemem: qsub -q largemem -l select=1:ncpus=128:mpiprocs=128 -o logs/ -v W=W1|W2,REP=N,PART=largemem jobs/fornax/cpu.pbs
+: "${W:?-v W=W1|W2}" "${REP:?-v REP=N}" "${PART:?-v PART=genoa|largemem}"
+REPO=$PBS_O_WORKDIR SITE=fornax
+PY=/scratch/li.mengke/envs/mace-bench/bin/python
+source "$REPO/jobs/common.sh"
+N=$NCPUS
+case "$W" in
+  W1) module load vasp/vasp.6.5.1; export OMP_NUM_THREADS=1
+      run_w1 "$N" 4 mpiexec -n "$N" vasp_std ;;
+  W2) run_w2 S cpu "$N" "$N" ;;
+esac
