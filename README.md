@@ -68,8 +68,8 @@ Optional **W1-large**: 3×3×3 supercell (432 atoms, Γ-only) to test scaling on
 | Model | **MACE-MPA-0 medium** (`mace-mpa-0-medium.model`, md5 pinned) |
 | Code | **mace-torch 0.3.15**, float32, identical conda-packed env on all sites (see §3) |
 | Ensemble | NVT Langevin, 600 K, 1 fs, seed fixed |
-| Sizes | **S**: 4×4×4 = 1 024 atoms; **L**: 10×10×10 = 16 000 atoms (GPU only) |
-| Steps | 200 warm-up (untimed) + 2 000 timed (GPU); 20 + 100 timed (CPU, size S only) |
+| Sizes | **S**: 4×4×4 = 1 024 atoms; **L**: 6×6×6 = 3 456 atoms (GPU only; 16 000 atoms ran out of memory on the 48 GB A40, and L must fit a 16 GB V100) |
+| Steps | S: 200 warm-up + 2 000 timed; L: 100 + 1 000 timed (GPU); CPU: 20 + 100 timed, size S only |
 | Parallel | GPU: 1 GPU, 8 CPU threads; CPU: full node, `torch.set_num_threads(cores)` |
 | GPUs | China V100 ×2 types, vanda A40, fornax RTX 5090, **hopper H100 and H200** |
 | Variant | **W2-cueq** (optional): same run with cuEquivariance kernels on GPUs that support them (A40, RTX 5090, H100, H200; V100 likely unsupported) |

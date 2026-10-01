@@ -1,7 +1,7 @@
 # Shared benchmark logic, sourced by every site's job script.
 # The caller sets: REPO SITE PART PY REP [SMOKE=0]
 #   run_w1 UNITS NCORE LAUNCH...         VASP fixed 25-SCF single point (3 SCF if SMOKE=1)
-#   run_w2 SIZE DEVICE THREADS UNITS     MACE NVT MD; SIZE = S (1024 atoms) | L (16000 atoms)
+#   run_w2 SIZE DEVICE THREADS UNITS     MACE NVT MD; SIZE = S (1024 atoms) | L (3456 atoms)
 
 set -euo pipefail
 SMOKE=${SMOKE:-0}
@@ -35,7 +35,7 @@ run_w2() {
     local size=$1 device=$2 threads=$3 units=$4 sc warm steps
     case "$size" in
         S) sc="4 4 4";    warm=200; steps=2000 ;;
-        L) sc="10 10 10"; warm=50;  steps=500 ;;
+        L) sc="6 6 6";    warm=100; steps=1000 ;;   # 3456 atoms: largest that fits a 16 GB V100
         *) echo "bad SIZE $size" >&2; exit 2 ;;
     esac
     if [ "$device" = cpu ]; then warm=20; steps=100; fi
