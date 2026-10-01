@@ -1,0 +1,36 @@
+data_cubic_Na3PS4_experimental_metric
+_audit_creation_method             'Ordered 6b representation with experimental cubic metric'
+_chemical_formula_sum              'Na6 P2 S8'
+_cell_length_a                     6.9965
+_cell_length_b                     6.9965
+_cell_length_c                     6.9965
+_cell_angle_alpha                  90
+_cell_angle_beta                   90
+_cell_angle_gamma                  90
+_space_group_name_H-M_alt          'I -4 3 m'
+_space_group_IT_number             217
+
+loop_
+_atom_site_label
+_atom_site_type_symbol
+_atom_site_fract_x
+_atom_site_fract_y
+_atom_site_fract_z
+_atom_site_occupancy
+Na1 Na 0.50000000 0.00000000 0.00000000 1.0
+Na2 Na 0.00000000 0.00000000 0.50000000 1.0
+Na3 Na 0.00000000 0.50000000 0.00000000 1.0
+Na4 Na 0.00000000 0.50000000 0.50000000 1.0
+Na5 Na 0.50000000 0.50000000 0.00000000 1.0
+Na6 Na 0.50000000 0.00000000 0.50000000 1.0
+P1  P  0.00000000 0.00000000 0.00000000 1.0
+P2  P  0.50000000 0.50000000 0.50000000 1.0
+S1  S  0.82900000 0.17100000 0.17100000 1.0
+S2  S  0.32900000 0.32900000 0.32900000 1.0
+S3  S  0.17100000 0.17100000 0.82900000 1.0
+S4  S  0.17100000 0.82900000 0.17100000 1.0
+S5  S  0.32900000 0.67100000 0.67100000 1.0
+S6  S  0.82900000 0.82900000 0.82900000 1.0
+S7  S  0.67100000 0.67100000 0.32900000 1.0
+S8  S  0.67100000 0.32900000 0.67100000 1.0
+

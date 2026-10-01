@@ -6,3 +6,6 @@ WAVECAR
 CHGCAR
 vasprun.xml
 *.traj
+runs/
+logs/
+models/

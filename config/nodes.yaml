@@ -14,9 +14,9 @@ china:                       # Slurm, ssh alias `china` (hpc.chinahpc.com:1014),
     cpu: "module load vasp-intel2024.2/6.5.1"
     gpu: "module load vasp/6.5.1-nvhpc"
 
-vanda:                       # PBS Pro, project CFP03-CF-027
+vanda:                       # PBS Pro, project CFP05-CF-241
   scheduler: pbs
-  workdir: /scratch/projects/CFP03/CFP03-CF-027/limengke/hpc-benchmark
+  workdir: /scratch/projects/CFP05/CFP05-CF-241/limengke/hpc-benchmark
   partitions:
     batch_cpu: {kind: cpu, cores: 72, mem_gb: 512, select: "select=1:ncpus=72:mpiprocs=72:mem=480gb"}
     batch_gpu: {kind: gpu, cores: 36, gpus: 2, gpu: "A40 48GB", select: "select=1:ncpus=8:ngpus=1:mem=64gb"}
@@ -37,9 +37,9 @@ fornax:                      # PBS Pro, queue-routed, no project code, max 72 h
     cpu: "module load vasp/vasp.6.5.1"
     gpu: "module load vasp/vasp.6.5.1_nvhpc"
 
-hopper:                      # PBS Pro, project CFP03-CF-027, -q auto. MACE only (no VASP on hopper)
+hopper:                      # PBS Pro, project CFP05-CF-241, -q auto. MACE only (no VASP on hopper)
   scheduler: pbs
-  workdir: /scratch/limengke/hpc-benchmark
+  workdir: /scratch/Projects/CFP-05/CFP05-CF-241/limengke/hpc-benchmark
   partitions:              # 8 GPUs, 112 cores, 2 TB per node; selected via gpu_model
     h100: {kind: gpu, gpus: 8, gpu: "H100", nodes: 4,  select: "select=1:ncpus=8:ngpus=1:mem=32gb:gpu_model=H100", vasp: false}
     h200: {kind: gpu, gpus: 8, gpu: "H200", nodes: 40, select: "select=1:ncpus=8:ngpus=1:mem=32gb:gpu_model=H200", vasp: false}
