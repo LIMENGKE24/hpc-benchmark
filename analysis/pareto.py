@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Collect results/**/*.json, attach cost from config/pricing.yaml, plot time vs cost Pareto fronts.
 
-Each result JSON needs: tag ("site/partition/workload/rep"), elapsed_s (VASP) or time_to_1ns_s (MACE),
+Each result JSON needs: tag ("site/partition/workload/rep"), time_s (VASP, LOOP+ real time) or time_to_1ns_s (MACE),
 and units_used (cores or GPUs charged). Usage: python analysis/pareto.py [--out pareto.png]
 """
 
@@ -25,7 +25,8 @@ def load_results() -> list[dict]:
         r = json.loads(path.read_text())
         site, partition, workload, _rep = r["tag"].split("/")
         r.update(site=site, partition=partition, bench=workload)
-        r["time_s"] = r.get("time_to_1ns_s", r.get("elapsed_s"))
+        # MACE: time for 1 ns; VASP: LOOP+ real time (set by parse_vasp.py)
+        r["time_s"] = r["time_to_1ns_s"] if "time_to_1ns_s" in r else r["time_s"]
         rows.append(r)
     return rows
 

@@ -56,7 +56,7 @@ fornax, so results are directly relevant).
 | Fixed work | `NSW = 0`, `NELMIN = NELM = 25`, `EDIFF = 1E-10` → exactly 25 SCF steps on every machine |
 | Output | `LWAVE = LCHARG = .FALSE.` (no I/O noise) |
 | Parallel | CPU: 1 full node, all physical cores, `KPAR = 1`, `NCORE = 4`. GPU (China `v100`/`v100g32`, fornax `rtx5090`): **1 GPU, 1 MPI rank**, `NCORE = 1`, `KPAR = 1` |
-| Metric | `Elapsed time` from OUTCAR + energy check (all sites must agree to < 1 meV/atom) |
+| Metric | **`LOOP+` real time** from OUTCAR (excludes startup/IO; `Elapsed time` kept for reference) + energy check (all sites must agree to < 1 meV/atom) |
 
 Optional **W1-8GPU**: full China V100 node (8 ranks, `KPAR = 4`) to see multi-GPU scaling.
 Optional **W1-large**: 3×3×3 supercell (432 atoms, Γ-only) to test scaling on fat nodes / multi-GPU.

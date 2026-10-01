@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
 """Turn one finished W1 run directory (OUTCAR) into a result JSON for analysis/pareto.py.
 
+Timing: time_s = LOOP+ real time (summed over ionic steps); Elapsed time is kept for reference.
+
 Usage: parse_vasp.py RUN_DIR --tag site/partition/W1/repN --units-used N --out results/.../repN.json
 """
 
@@ -36,6 +38,8 @@ def main() -> None:
         "tag": args.tag,
         "workload": "vasp_scf",
         "units_used": args.units_used,
+        # benchmark time = LOOP+ real time (all ionic steps; NSW=0 -> one), excludes startup/IO
+        "time_s": sum(float(t) for t in re.findall(r"LOOP\+:\s+cpu time\s+[\d.]+:\s+real time\s+([\d.]+)", outcar)),
         "elapsed_s": grab(r"Elapsed time \(sec\):\s+([\d.]+)", outcar),
         "loop_s_per_scf": grab(r"LOOP:\s+cpu time\s+[\d.]+:\s+real time\s+([\d.]+)", outcar),
         "n_scf": len(re.findall(r"LOOP:\s+cpu time", outcar)),
