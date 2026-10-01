@@ -5,7 +5,7 @@ Benchmark every CPU and GPU node type we can use on **China HPC (超算云平台
 with *identical* VASP and MACE-MD workloads, then plot **time-to-solution vs. cost per job** to find the
 Pareto-optimal nodes (fastest for a given cost / cheapest for a given speed).
 
-> Status: **plan v2 (2026-10-01)** — decisions and prices fixed (§4, §7); nothing has been run yet.
+> Status (2026-10-01): inputs + env validated on all 4 clusters; **production runs submitted** (81 jobs). See §8 for findings.
 
 ---
 
@@ -150,12 +150,12 @@ Rules:
 | # | Step | Where | Status |
 |---|---|---|---|
 | 0 | Access + inventory of all partitions | all | ✅ done (2026-10-01) |
-| 1 | Build structures, POTCAR, INCAR; record md5s | vanda | ⬜ |
-| 2 | Build `mace-bench` env, conda-pack, distribute | vanda → fornax, hopper, China | ⬜ |
-| 3 | Run `fingerprint.py` on one node per GPU type + CPU; confirm identical energies | all | ⬜ |
-| 4 | Smoke test: 1 short run per partition (W1 with NELM=3, W2 with 50 steps) | all | ⬜ |
+| 1 | Build structures, POTCAR, INCAR; record md5s | vanda | ✅ |
+| 2 | Build `mace-bench` env, conda-pack, distribute | vanda → fornax, hopper, China | ✅ (same tarball, md5 `eb73c579…`) |
+| 3 | Run `fingerprint.py` on one node per GPU type + CPU; confirm identical energies | all | ✅ A40/RTX5090/H100/H200/V100 agree to 1e-13 eV |
+| 4 | Smoke test: 1 short run per partition (W1 with NELM=3, W2 with 20 steps) | all | ✅ |
 | 5 | Fill in `pricing.yaml` | — | ✅ done (2026-10-01) |
-| 6 | Production: 3 replicates × all partitions × W1/W2 | all | ⬜ |
+| 6 | Production: 3 replicates × all partitions × W1/W2 | all | 🔄 submitted 2026-10-01 (fornax CPU pending node diagnosis) |
 | 7 | Collect results, plot Pareto front, write summary | local | ⬜ |
 
 Rough compute budget: W1 ≈ 0.2–1 node-h per run → ~12 partitions × 3 reps ≈ 20 node-h;
@@ -171,6 +171,21 @@ W2 ≈ < 0.5 GPU-h per run. Small enough to finish in about 1 week including que
 4. Tianjin Region 1: **excluded** ✅
 5. hopper H100 / H200: **included for MACE only** (no VASP) ✅
 6. Still open: multi-node scaling (2–4 nodes) — out of scope for v1 unless requested.
+
+---
+
+## 8. Findings during setup
+
+- **Project code** for vanda/hopper is now `CFP05-CF-241` (CFP03-CF-027 expired).
+- **fornax GPU nodes do not mount `/scratch`** → fornax runs from `/home/li.mengke/hpc-benchmark`.
+- **fornax `genoa` queue is heterogeneous**: `fornax-c13` = AMD EPYC 7543 (Milan), `fornax-c15…c20` = EPYC 9354 (Genoa).
+  With the stock `vasp/vasp.6.5.1` (Intel 2019) build, one SCF step takes 6.4 s on c13 but ~30 s on c15;
+  `MKL_DEBUG_CPU_TYPE=5` does not help. Per-node diagnosis is running; genoa will be split by node type on the plot.
+- **vanda free `gpu` queue**: access denied for our account → dropped from the plan.
+- **hopper login node** kills background processes (incl. tmux) at logout; build envs elsewhere or in a job.
+- **China HPC → no internet**: env copied as a conda-pack tarball (4.2 GB, ~2 h over 4 parallel streams).
+- **VASP timing** uses the `LOOP+` real time (excludes ~14 s startup/IO per run).
+- VASP on consumer RTX 5090 is FP64-limited (~115 s/SCF vs ~6 s on a 72-core CPU node).
 
 ---
 
