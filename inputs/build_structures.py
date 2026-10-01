@@ -27,8 +27,7 @@ def main() -> None:
     assert unit.get_chemical_formula() == "Na6P2S8", unit.get_chemical_formula()
 
     w1 = sort_species(unit * (2, 2, 2))
-    write(HERE / "vasp" / "POSCAR", w1, format="vasp", direct=True, sort=False,
-          label="c-Na3PS4 2x2x2 (128 atoms), a=6.9965 A")
+    write(HERE / "vasp" / "POSCAR", w1, format="vasp", direct=True, sort=False)
 
     write(HERE / "mace" / "Na3PS4_unit.extxyz", unit)
 
