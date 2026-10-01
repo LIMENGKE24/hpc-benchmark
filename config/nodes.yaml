@@ -30,7 +30,9 @@ fornax:                      # PBS Pro, queue-routed, no project code, max 72 h
   scheduler: pbs
   workdir: /home/li.mengke/hpc-benchmark   # GPU nodes do not mount /scratch
   partitions:
-    genoa:    {kind: cpu, cores: 64, mem_gb: 384, select: "select=1:ncpus=64:mpiprocs=64", place: excl}
+    genoa_9354: {kind: cpu, cores: 64, cpu: "2x AMD EPYC 9354", nodes: "fornax-c16..c20", select: "select=1:ncpus=64:mpiprocs=64:vnode=fornax-cNN", place: excl}
+    genoa_7543: {kind: cpu, cores: 64, cpu: "2x AMD EPYC 7543", nodes: "fornax-c13", select: "select=1:ncpus=64:mpiprocs=64:vnode=fornax-c13", place: excl}
+    # fornax-c15 (EPYC 9354) excluded: ~30 s/SCF vs 3.7-4.2 s on c16/c18 (Oct 2026) - report to admin
     largemem: {kind: cpu, cores: 128, mem_gb: 512, select: "select=1:ncpus=128:mpiprocs=128", place: excl}
     rtx5090:  {kind: gpu, cores: 32, gpus: 1, gpu: "RTX 5090 32GB", select: "select=1:ncpus=32", place: excl, vasp_gpu: true}
   vasp:

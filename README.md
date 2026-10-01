@@ -179,8 +179,10 @@ W2 ≈ < 0.5 GPU-h per run. Small enough to finish in about 1 week including que
 - **Project code** for vanda/hopper is now `CFP05-CF-241` (CFP03-CF-027 expired).
 - **fornax GPU nodes do not mount `/scratch`** → fornax runs from `/home/li.mengke/hpc-benchmark`.
 - **fornax `genoa` queue is heterogeneous**: `fornax-c13` = AMD EPYC 7543 (Milan), `fornax-c15…c20` = EPYC 9354 (Genoa).
-  With the stock `vasp/vasp.6.5.1` (Intel 2019) build, one SCF step takes 6.4 s on c13 but ~30 s on c15;
-  `MKL_DEBUG_CPU_TYPE=5` does not help. Per-node diagnosis is running; genoa will be split by node type on the plot.
+  Stock `vasp/vasp.6.5.1` (Intel 2019): 3.7–4.2 s/SCF on c16/c18 (fastest CPU nodes measured), 6.4 s on c13,
+  but ~30 s on **c15** (twice, alone on the node; `MKL_DEBUG_CPU_TYPE=5` no help) → c15 excluded, likely a node fault.
+  On the plot genoa is split into `genoa_9354` and `genoa_7543`.
+- **fornax node pinning**: use `vnode=fornax-cNN`; `host=` never matches CPU nodes (they register as `fornax-cNN-ib0`).
 - **vanda free `gpu` queue**: access denied for our account → dropped from the plan.
 - **hopper login node** kills background processes (incl. tmux) at logout; build envs elsewhere or in a job.
 - **China HPC → no internet**: env copied as a conda-pack tarball (4.2 GB, ~2 h over 4 parallel streams).

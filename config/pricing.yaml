@@ -26,5 +26,7 @@ hopper:               # same source; H100 and H200 share one rate
 
 fornax:               # group-owned -> average market rental price for the same configuration
   genoa:    {unit: core_hour, rate: 0.0513, currency: USD}  # AWS c7a (EPYC Genoa, 1 vCPU = 1 core), us-east-1 on-demand, Jul 2026
+  genoa_9354: {unit: core_hour, rate: 0.0513, currency: USD}  # genoa queue, EPYC 9354 nodes c16-c20 (c15 excluded: anomalously slow)
+  genoa_7543: {unit: core_hour, rate: 0.0513, currency: USD}  # genoa queue, EPYC 7543 node c13
   largemem: {unit: core_hour, rate: 0.0513, currency: USD}  # same CPU-class reference
   rtx5090:  {unit: gpu_hour,  rate: 0.43,   currency: USD}  # median RTX 5090 32GB rental across ~100 cloud listings (computeprices.com, Jul 2026)
