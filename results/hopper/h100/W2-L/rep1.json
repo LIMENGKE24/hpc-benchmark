@@ -1,0 +1,20 @@
+{
+  "tag": "hopper/h100/W2-L/rep1",
+  "workload": "mace_md",
+  "units_used": 1.0,
+  "natoms": 3456,
+  "steps": 1000,
+  "elapsed_s": 279.1004040921107,
+  "steps_per_s": 3.582939993415319,
+  "ns_per_day": 0.30956601543108353,
+  "time_to_1ns_s": 279100.4040921107,
+  "final_epot_eV": -13951.0869140625,
+  "host": "hopper-04",
+  "device": "cuda",
+  "gpu": "NVIDIA H100 80GB HBM3",
+  "threads": 8,
+  "torch": "2.8.0+cu128",
+  "cuda": "12.8",
+  "python": "3.11.16",
+  "model_md5": "d217978dec88bf75bc851dc9443f5e17"
+}

@@ -1,0 +1,20 @@
+{
+  "tag": "china/48cp1/W2-S/rep3",
+  "workload": "mace_md",
+  "units_used": 48.0,
+  "natoms": 1024,
+  "steps": 100,
+  "elapsed_s": 419.50454595591873,
+  "steps_per_s": 0.23837643945462259,
+  "ns_per_day": 0.020595724368879388,
+  "time_to_1ns_s": 4195045.459559187,
+  "final_epot_eV": -4145.912109375,
+  "host": "c21057.hpc2",
+  "device": "cpu",
+  "gpu": null,
+  "threads": 48,
+  "torch": "2.8.0+cu128",
+  "cuda": "12.8",
+  "python": "3.11.16",
+  "model_md5": "d217978dec88bf75bc851dc9443f5e17"
+}

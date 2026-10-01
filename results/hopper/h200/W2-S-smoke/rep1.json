@@ -1,0 +1,20 @@
+{
+  "tag": "hopper/h200/W2-S-smoke/rep1",
+  "workload": "mace_md",
+  "units_used": 1.0,
+  "natoms": 1024,
+  "steps": 20,
+  "elapsed_s": 1.2575415335595608,
+  "steps_per_s": 15.904047274994232,
+  "ns_per_day": 1.3741096845595016,
+  "time_to_1ns_s": 62877.07667797804,
+  "final_epot_eV": -4173.7119140625,
+  "host": "hopper-28",
+  "device": "cuda",
+  "gpu": "NVIDIA H200",
+  "threads": 8,
+  "torch": "2.8.0+cu128",
+  "cuda": "12.8",
+  "python": "3.11.16",
+  "model_md5": "d217978dec88bf75bc851dc9443f5e17"
+}

@@ -1,0 +1,15 @@
+{
+  "tag": "vanda/batch_cpu/W1/rep2",
+  "workload": "vasp_scf",
+  "units_used": 72.0,
+  "time_s": 147.2852,
+  "elapsed_s": 162.0,
+  "loop_s_per_scf": 3.7187,
+  "n_scf": 25,
+  "natoms": 128,
+  "toten_eV": -526.017345,
+  "toten_eV_per_atom": -4.1095105078125,
+  "vasp_version": "vasp.6.5.1",
+  "mpi_ranks": 72,
+  "host": "GN-A40-087"
+}

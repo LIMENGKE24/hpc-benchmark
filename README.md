@@ -156,7 +156,7 @@ Rules:
 | 4 | Smoke test: 1 short run per partition (W1 with NELM=3, W2 with 20 steps) | all | ✅ |
 | 5 | Fill in `pricing.yaml` | — | ✅ done (2026-10-01) |
 | 6 | Production: 3 replicates × all partitions × W1/W2 | all | 🔄 submitted 2026-10-01 (fornax CPU pending node diagnosis) |
-| 7 | Collect results, plot Pareto front, write summary | local | ⬜ |
+| 7 | Collect results, plot Pareto front, write summary | local | 🔄 preliminary (§9) |
 
 Rough compute budget: W1 ≈ 0.2–1 node-h per run → ~12 partitions × 3 reps ≈ 20 node-h;
 W2 ≈ < 0.5 GPU-h per run. Small enough to finish in about 1 week including queue time.
@@ -186,6 +186,65 @@ W2 ≈ < 0.5 GPU-h per run. Small enough to finish in about 1 week including que
 - **China HPC → no internet**: env copied as a conda-pack tarball (4.2 GB, ~2 h over 4 parallel streams).
 - **VASP timing** uses the `LOOP+` real time (excludes ~14 s startup/IO per run).
 - VASP on consumer RTX 5090 is FP64-limited (~115 s/SCF vs ~6 s on a 72-core CPU node).
+
+---
+
+## 9. Results (2026-10-01, fornax CPU pending)
+
+![Pareto front](analysis/pareto.png)
+
+Medians of 3 runs. ★ = Pareto-optimal (no other partition is both faster and cheaper).
+Regenerate: `analysis/collect.sh && python analysis/pareto.py && python analysis/summary.py`.
+
+**W1** — time in s (25 SCF, LOOP+)
+
+| Partition | Time | Cost / job (SGD) | Runs | Pareto |
+|---|---|---|---|---|
+| `china/v100` | 138 | 0.00724 | 3 | ★ |
+| `china/v100g32` | 145 | 0.00762 | 3 |  |
+| `vanda/batch_cpu` | 148 | 0.0297 | 3 |  |
+| `china/9242` | 161 | 0.0813 | 3 |  |
+| `fornax/rtx5090` | 189 | 0.0286 | 3 |  |
+| `china/48cp2` | 319 | 0.0805 | 3 |  |
+| `china/48cp3` | 326 | 0.0821 | 3 |  |
+| `china/48cp1` | 334 | 0.0841 | 3 |  |
+| `china/p1` | 377 | 0.0791 | 3 |  |
+
+**W2-L** — time in h per ns (3 456 atoms)
+
+| Partition | Time | Cost / ns (SGD) | Runs | Pareto |
+|---|---|---|---|---|
+| `fornax/rtx5090` | 55.7 | 30.3 | 3 | ★ |
+| `hopper/h200` | 74.6 | 186 | 3 |  |
+| `hopper/h100` | 77.4 | 193 | 3 |  |
+| `china/v100g32` | 145 | 27.3 | 3 | ★ |
+| `china/v100` | 145 | 27.5 | 3 |  |
+| `vanda/batch_gpu` | 157 | 94.4 | 3 |  |
+
+**W2-S** — time in h per ns (1 024 atoms)
+
+| Partition | Time | Cost / ns (SGD) | Runs | Pareto |
+|---|---|---|---|---|
+| `fornax/rtx5090` | 17.3 | 9.42 | 3 | ★ |
+| `hopper/h200` | 17.8 | 44.4 | 3 |  |
+| `hopper/h100` | 18.8 | 47.1 | 3 |  |
+| `china/v100` | 41.6 | 7.86 | 3 | ★ |
+| `china/v100g32` | 43.3 | 8.18 | 3 |  |
+| `vanda/batch_gpu` | 47 | 28.2 | 3 |  |
+| `vanda/batch_cpu` | 225 | 162 | 3 |  |
+| `china/48cp2` | 854 | 775 | 3 |  |
+| `china/48cp3` | 921 | 836 | 3 |  |
+| `china/9242` | 992 | 1.8e+03 | 3 |  |
+| `china/p1` | 1.04e+03 | 783 | 3 |  |
+| `china/48cp1` | 1.17e+03 | 1.06e+03 | 3 |  |
+
+**Takeaways (preliminary)**
+- **VASP**: China `v100` (1 GPU, nvhpc build) is both fastest and cheapest for this 128-atom SCF.
+  Among CPU nodes, vanda (72 c) is fastest and ~3× cheaper per job than any China CPU partition.
+- **MACE**: fornax RTX 5090 is fastest at both sizes; China V100 is cheapest.
+  H100/H200 are about as fast as the RTX 5090 but ~5× the cost per ns (no cuEquivariance; small systems).
+- CPU nodes are 20–60× slower than GPUs for MACE MD and not competitive on cost.
+- Energies agree across sites: VASP −526.017345 eV on every CPU/GPU build; MACE fingerprint to 1e-13 eV.
 
 ---
 

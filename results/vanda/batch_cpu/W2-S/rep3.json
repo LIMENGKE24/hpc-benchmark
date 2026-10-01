@@ -1,0 +1,20 @@
+{
+  "tag": "vanda/batch_cpu/W2-S/rep3",
+  "workload": "mace_md",
+  "units_used": 72.0,
+  "natoms": 1024,
+  "steps": 100,
+  "elapsed_s": 73.23059072997421,
+  "steps_per_s": 1.3655495470292407,
+  "ns_per_day": 0.11798348086332638,
+  "time_to_1ns_s": 732305.9072997421,
+  "final_epot_eV": -4145.91259765625,
+  "host": "GN-A40-087",
+  "device": "cpu",
+  "gpu": null,
+  "threads": 72,
+  "torch": "2.8.0+cu128",
+  "cuda": "12.8",
+  "python": "3.11.16",
+  "model_md5": "d217978dec88bf75bc851dc9443f5e17"
+}

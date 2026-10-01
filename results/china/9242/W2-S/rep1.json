@@ -1,0 +1,20 @@
+{
+  "tag": "china/9242/W2-S/rep1",
+  "workload": "mace_md",
+  "units_used": 96.0,
+  "natoms": 1024,
+  "steps": 100,
+  "elapsed_s": 357.2933486830443,
+  "steps_per_s": 0.27988206432779195,
+  "ns_per_day": 0.024181810357921222,
+  "time_to_1ns_s": 3572933.4868304427,
+  "final_epot_eV": -4145.912109375,
+  "host": "c21227.hpc2",
+  "device": "cpu",
+  "gpu": null,
+  "threads": 96,
+  "torch": "2.8.0+cu128",
+  "cuda": "12.8",
+  "python": "3.11.16",
+  "model_md5": "d217978dec88bf75bc851dc9443f5e17"
+}

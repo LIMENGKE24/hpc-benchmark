@@ -1,0 +1,20 @@
+{
+  "tag": "fornax/rtx5090/W2-L/rep1",
+  "workload": "mace_md",
+  "units_used": 1.0,
+  "natoms": 3456,
+  "steps": 1000,
+  "elapsed_s": 200.50747790187597,
+  "steps_per_s": 4.987345162704497,
+  "ns_per_day": 0.43090662205766855,
+  "time_to_1ns_s": 200507.47790187597,
+  "final_epot_eV": -13951.0869140625,
+  "host": "fornax-g04.hpc.local",
+  "device": "cuda",
+  "gpu": "NVIDIA GeForce RTX 5090",
+  "threads": 8,
+  "torch": "2.8.0+cu128",
+  "cuda": "12.8",
+  "python": "3.11.16",
+  "model_md5": "d217978dec88bf75bc851dc9443f5e17"
+}

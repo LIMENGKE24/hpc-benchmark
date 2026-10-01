@@ -1,0 +1,15 @@
+{
+  "tag": "china/v100g32/W1/rep3",
+  "workload": "vasp_scf",
+  "units_used": 1.0,
+  "time_s": 144.7591,
+  "elapsed_s": 163.236,
+  "loop_s_per_scf": 3.2523,
+  "n_scf": 25,
+  "natoms": 128,
+  "toten_eV": -526.01734486,
+  "toten_eV_per_atom": -4.10951050671875,
+  "vasp_version": "vasp.6.5.1",
+  "mpi_ranks": 1,
+  "host": "c2v100m2-3.hpc2"
+}

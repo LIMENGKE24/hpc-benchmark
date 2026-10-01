@@ -1,0 +1,20 @@
+{
+  "tag": "hopper/h100/W2-S-smoke/rep1",
+  "workload": "mace_md",
+  "units_used": 1.0,
+  "natoms": 1024,
+  "steps": 20,
+  "elapsed_s": 1.328700093086809,
+  "steps_per_s": 15.052305711469026,
+  "ns_per_day": 1.3005192134709238,
+  "time_to_1ns_s": 66435.00465434045,
+  "final_epot_eV": -4173.71240234375,
+  "host": "hopper-04",
+  "device": "cuda",
+  "gpu": "NVIDIA H100 80GB HBM3",
+  "threads": 8,
+  "torch": "2.8.0+cu128",
+  "cuda": "12.8",
+  "python": "3.11.16",
+  "model_md5": "d217978dec88bf75bc851dc9443f5e17"
+}

@@ -1,0 +1,15 @@
+{
+  "tag": "fornax/genoa_mkl5/W1-smoke/rep1",
+  "workload": "vasp_scf",
+  "units_used": 64.0,
+  "time_s": 92.024,
+  "elapsed_s": 168.563,
+  "loop_s_per_scf": 27.7593,
+  "n_scf": 3,
+  "natoms": 128,
+  "toten_eV": -459.53964734,
+  "toten_eV_per_atom": -3.59015349484375,
+  "vasp_version": "vasp.6.5.1",
+  "mpi_ranks": 64,
+  "host": "fornax-c15"
+}

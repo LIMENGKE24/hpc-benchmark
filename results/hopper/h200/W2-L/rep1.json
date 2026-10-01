@@ -1,0 +1,20 @@
+{
+  "tag": "hopper/h200/W2-L/rep1",
+  "workload": "mace_md",
+  "units_used": 1.0,
+  "natoms": 3456,
+  "steps": 1000,
+  "elapsed_s": 271.865750101977,
+  "steps_per_s": 3.678286064445041,
+  "ns_per_day": 0.3178039159680515,
+  "time_to_1ns_s": 271865.750101977,
+  "final_epot_eV": -13951.083984375,
+  "host": "hopper-19",
+  "device": "cuda",
+  "gpu": "NVIDIA H200",
+  "threads": 8,
+  "torch": "2.8.0+cu128",
+  "cuda": "12.8",
+  "python": "3.11.16",
+  "model_md5": "d217978dec88bf75bc851dc9443f5e17"
+}

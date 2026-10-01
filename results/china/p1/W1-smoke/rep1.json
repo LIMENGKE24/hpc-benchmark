@@ -1,0 +1,15 @@
+{
+  "tag": "china/p1/W1-smoke/rep1",
+  "workload": "vasp_scf",
+  "units_used": 40.0,
+  "time_s": 56.0871,
+  "elapsed_s": 68.241,
+  "loop_s_per_scf": 15.8486,
+  "n_scf": 3,
+  "natoms": 128,
+  "toten_eV": -454.48865064,
+  "toten_eV_per_atom": -3.550692583125,
+  "vasp_version": "vasp.6.5.1",
+  "mpi_ranks": 40,
+  "host": "c20736.hpc2"
+}

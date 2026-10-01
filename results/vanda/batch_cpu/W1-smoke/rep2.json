@@ -1,0 +1,14 @@
+{
+  "tag": "vanda/batch_cpu/W1-smoke/rep2",
+  "workload": "vasp_scf",
+  "units_used": 72.0,
+  "elapsed_s": 33.945,
+  "loop_s_per_scf": 5.6233,
+  "n_scf": 3,
+  "natoms": 128,
+  "toten_eV": -461.84944603,
+  "toten_eV_per_atom": -3.608198797109375,
+  "vasp_version": "vasp.6.5.1",
+  "mpi_ranks": 72,
+  "host": "CN-124"
+}

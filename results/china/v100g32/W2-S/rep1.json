@@ -1,0 +1,20 @@
+{
+  "tag": "china/v100g32/W2-S/rep1",
+  "workload": "mace_md",
+  "units_used": 1.0,
+  "natoms": 1024,
+  "steps": 2000,
+  "elapsed_s": 312.6749516790733,
+  "steps_per_s": 6.396418994421983,
+  "ns_per_day": 0.5526506011180592,
+  "time_to_1ns_s": 156337.47583953664,
+  "final_epot_eV": -4131.54052734375,
+  "host": "c2v100m2-2.hpc2",
+  "device": "cuda",
+  "gpu": "Tesla V100-SXM2-32GB",
+  "threads": 3,
+  "torch": "2.8.0+cu128",
+  "cuda": "12.8",
+  "python": "3.11.16",
+  "model_md5": "d217978dec88bf75bc851dc9443f5e17"
+}

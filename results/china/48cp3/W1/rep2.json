@@ -1,0 +1,15 @@
+{
+  "tag": "china/48cp3/W1/rep2",
+  "workload": "vasp_scf",
+  "units_used": 48.0,
+  "time_s": 329.5467,
+  "elapsed_s": 351.47,
+  "loop_s_per_scf": 7.7703,
+  "n_scf": 25,
+  "natoms": 128,
+  "toten_eV": -526.017345,
+  "toten_eV_per_atom": -4.1095105078125,
+  "vasp_version": "vasp.6.5.1",
+  "mpi_ranks": 48,
+  "host": "c21460.hpc2"
+}

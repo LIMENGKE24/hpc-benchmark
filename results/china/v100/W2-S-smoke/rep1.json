@@ -1,0 +1,20 @@
+{
+  "tag": "china/v100/W2-S-smoke/rep1",
+  "workload": "mace_md",
+  "units_used": 1.0,
+  "natoms": 1024,
+  "steps": 20,
+  "elapsed_s": 3.639536989852786,
+  "steps_per_s": 5.495204487757925,
+  "ns_per_day": 0.47478566774228464,
+  "time_to_1ns_s": 181976.8494926393,
+  "final_epot_eV": -4173.71240234375,
+  "host": "c2v100-2.hpc2",
+  "device": "cuda",
+  "gpu": "Tesla V100-SXM2-16GB",
+  "threads": 3,
+  "torch": "2.8.0+cu128",
+  "cuda": "12.8",
+  "python": "3.11.16",
+  "model_md5": "d217978dec88bf75bc851dc9443f5e17"
+}

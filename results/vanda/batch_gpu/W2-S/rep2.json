@@ -1,0 +1,20 @@
+{
+  "tag": "vanda/batch_gpu/W2-S/rep2",
+  "workload": "mace_md",
+  "units_used": 1.0,
+  "natoms": 1024,
+  "steps": 2000,
+  "elapsed_s": 338.3245325398166,
+  "steps_per_s": 5.911483819946238,
+  "ns_per_day": 0.5107522020433549,
+  "time_to_1ns_s": 169162.2662699083,
+  "final_epot_eV": -4131.53955078125,
+  "host": "GN-A40-035",
+  "device": "cuda",
+  "gpu": "NVIDIA A40",
+  "threads": 8,
+  "torch": "2.8.0+cu128",
+  "cuda": "12.8",
+  "python": "3.11.16",
+  "model_md5": "d217978dec88bf75bc851dc9443f5e17"
+}

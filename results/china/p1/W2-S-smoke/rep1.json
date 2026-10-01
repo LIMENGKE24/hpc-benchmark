@@ -1,0 +1,20 @@
+{
+  "tag": "china/p1/W2-S-smoke/rep1",
+  "workload": "mace_md",
+  "units_used": 40.0,
+  "natoms": 1024,
+  "steps": 20,
+  "elapsed_s": 72.76217229664326,
+  "steps_per_s": 0.27486809929838585,
+  "ns_per_day": 0.023748603779380536,
+  "time_to_1ns_s": 3638108.6148321633,
+  "final_epot_eV": -4173.7119140625,
+  "host": "c20749.hpc2",
+  "device": "cpu",
+  "gpu": null,
+  "threads": 40,
+  "torch": "2.8.0+cu128",
+  "cuda": "12.8",
+  "python": "3.11.16",
+  "model_md5": "d217978dec88bf75bc851dc9443f5e17"
+}
