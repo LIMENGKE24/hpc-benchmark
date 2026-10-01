@@ -26,6 +26,7 @@ print(json.dumps({
     "torch": torch.__version__,
     "cuda": torch.version.cuda,
     "gpu": torch.cuda.get_device_name(0) if device == "cuda" else None,
+    "cuda_arch_list": torch.cuda.get_arch_list(),
     "mace": mace.__version__,
     "ase": ase.__version__,
     "numpy": np.__version__,
