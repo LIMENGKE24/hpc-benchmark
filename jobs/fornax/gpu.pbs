@@ -8,7 +8,7 @@
 # qsub -o logs/ -v W=W1|W2|FP,SIZE=S|L,REP=N[,SMOKE=1] jobs/fornax/gpu.pbs
 : "${W:?-v W=W1|W2|FP}" "${REP:=1}"
 REPO=$PBS_O_WORKDIR SITE=fornax PART=rtx5090
-PY=/scratch/li.mengke/envs/mace-bench/bin/python
+PY=/home/li.mengke/envs/mace-bench/bin/python
 export CUDA_VISIBLE_DEVICES=0
 source "$REPO/jobs/common.sh"
 case "$W" in

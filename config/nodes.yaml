@@ -28,7 +28,7 @@ vanda:                       # PBS Pro, project CFP05-CF-241
 
 fornax:                      # PBS Pro, queue-routed, no project code, max 72 h
   scheduler: pbs
-  workdir: /scratch/li.mengke/hpc-benchmark
+  workdir: /home/li.mengke/hpc-benchmark   # GPU nodes do not mount /scratch
   partitions:
     genoa:    {kind: cpu, cores: 64, mem_gb: 384, select: "select=1:ncpus=64:mpiprocs=64", place: excl}
     largemem: {kind: cpu, cores: 128, mem_gb: 512, select: "select=1:ncpus=128:mpiprocs=128", place: excl}

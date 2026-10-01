@@ -9,7 +9,7 @@
 # largemem: qsub -q largemem -l select=1:ncpus=128:mpiprocs=128 -o logs/ -v W=W1|W2,REP=N,PART=largemem jobs/fornax/cpu.pbs
 : "${W:?-v W=W1|W2}" "${REP:?-v REP=N}" "${PART:?-v PART=genoa|largemem}"
 REPO=$PBS_O_WORKDIR SITE=fornax
-PY=/scratch/li.mengke/envs/mace-bench/bin/python
+PY=/home/li.mengke/envs/mace-bench/bin/python
 source "$REPO/jobs/common.sh"
 N=$NCPUS
 case "$W" in
