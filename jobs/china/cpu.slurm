@@ -12,7 +12,7 @@ PY=/data/home/limengke/envs/mace-bench/bin/python
 source "$REPO/jobs/common.sh"
 N=$SLURM_NTASKS
 case "$W" in
-  W1) module load vasp-intel2024.2/6.5.1; export OMP_NUM_THREADS=1
+  W1) modload vasp-intel2024.2/6.5.1; export OMP_NUM_THREADS=1
       run_w1 "$N" 4 mpirun -np "$N" vasp_std ;;
   W2) run_w2 S cpu "$N" "$N" ;;
 esac

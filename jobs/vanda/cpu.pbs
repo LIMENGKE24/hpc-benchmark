@@ -10,7 +10,7 @@ REPO=$PBS_O_WORKDIR SITE=vanda PART=batch_cpu
 PY=/scratch/projects/CFP05/CFP05-CF-241/limengke/envs/mace-bench/bin/python
 source "$REPO/jobs/common.sh"
 case "$W" in
-  W1) module load openmpi; module load intel/2023b; export OMP_NUM_THREADS=1
+  W1) modload openmpi; modload intel/2023b; export OMP_NUM_THREADS=1
       run_w1 72 4 mpiexec -n 72 /home/svu/limengke/bin/vasp.6.5.1/vasp_std ;;
   W2) run_w2 S cpu 72 72 ;;
 esac

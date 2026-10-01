@@ -7,6 +7,9 @@ set -euo pipefail
 SMOKE=${SMOKE:-0}
 SUF=$([ "$SMOKE" = 1 ] && echo -smoke || true)
 
+# Lmod/Environment Modules scripts reference unset variables, so relax `set -u` around them
+modload() { set +u; module load "$@"; local rc=$?; set -u; return $rc; }
+
 _rundir() {  # $1 = workload label
     TAG=$SITE/$PART/$1$SUF/rep$REP
     RUN=$REPO/runs/$TAG

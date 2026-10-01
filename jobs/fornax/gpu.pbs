@@ -12,7 +12,7 @@ PY=/home/li.mengke/envs/mace-bench/bin/python
 export CUDA_VISIBLE_DEVICES=0
 source "$REPO/jobs/common.sh"
 case "$W" in
-  W1) module load vasp/vasp.6.5.1_nvhpc; export OMP_NUM_THREADS=1
+  W1) modload vasp/vasp.6.5.1_nvhpc; export OMP_NUM_THREADS=1
       run_w1 1 1 mpirun -np 1 vasp_std ;;
   W2) run_w2 "${SIZE:?-v SIZE=S|L}" cuda 8 1 ;;
   FP) run_fingerprint fornax_rtx5090 ;;

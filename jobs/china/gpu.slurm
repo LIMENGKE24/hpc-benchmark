@@ -12,7 +12,7 @@ REPO=$SLURM_SUBMIT_DIR SITE=china PART=$SLURM_JOB_PARTITION
 PY=/data/home/limengke/envs/mace-bench/bin/python
 source "$REPO/jobs/common.sh"
 case "$W" in
-  W1) module load vasp/6.5.1-nvhpc; export OMP_NUM_THREADS=1
+  W1) modload vasp/6.5.1-nvhpc; export OMP_NUM_THREADS=1
       run_w1 1 1 mpirun -np 1 vasp_std ;;
   W2) run_w2 "${SIZE:?SIZE=S|L}" cuda 3 1 ;;
   FP) run_fingerprint "china_$PART" ;;
