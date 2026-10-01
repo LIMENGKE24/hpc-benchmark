@@ -8,7 +8,7 @@ dependencies:
   - conda-pack
   - pip:
       - --extra-index-url https://download.pytorch.org/whl/cu128
-      - torch==2.8.0+cu128      # covers sm_70 (V100), sm_86 (A40), sm_120 (RTX 5090); TODO verify
+      - torch==2.8.0+cu128      # sm_70 V100, sm_86 A40, sm_90 H100/H200, sm_120 RTX 5090; TODO verify
       - mace-torch==0.3.15
       - ase==3.25.0
       - numpy<2.3

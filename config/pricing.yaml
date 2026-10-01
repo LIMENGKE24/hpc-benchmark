@@ -1,20 +1,30 @@
-# Cost rates. cost_per_job = rate * units * wall_hours, converted to SGD.
-# unit: core_hour | gpu_hour | node_hour.  ALL VALUES TODO.
-fx_to_sgd: {CNY: null, SGD: 1.0}
-china:
-  p1:      {unit: core_hour, rate: null, currency: CNY}
-  "9242":  {unit: core_hour, rate: null, currency: CNY}
-  48cp1:   {unit: core_hour, rate: null, currency: CNY}
-  48cp2:   {unit: core_hour, rate: null, currency: CNY}
-  48cp3:   {unit: core_hour, rate: null, currency: CNY}
-  v100:    {unit: gpu_hour,  rate: null, currency: CNY}
-  v100g32: {unit: gpu_hour,  rate: null, currency: CNY}
-vanda:
-  batch_cpu:    {unit: core_hour, rate: null, currency: SGD}
-  batch_gpu:    {unit: gpu_hour,  rate: null, currency: SGD}
-  cpu_parallel: {unit: core_hour, rate: 0.0,  currency: SGD}
-  gpu:          {unit: gpu_hour,  rate: 0.0,  currency: SGD}
-fornax:   # DECIDE: amortised hardware cost or 0
-  genoa:    {unit: node_hour, rate: null, currency: SGD}
-  largemem: {unit: node_hour, rate: null, currency: SGD}
-  rtx5090:  {unit: gpu_hour,  rate: null, currency: SGD}
+# Cost rates. cost_per_job = rate * units_used * wall_hours * fx_to_sgd[currency].
+# unit: core_hour (cores charged) | gpu_hour (GPUs charged; host cores included).
+fx_to_sgd:            # 2026-09-13 spot (valutafx / longforecast)
+  SGD: 1.0
+  CNY: 0.189          # 1 SGD = 5.2856 CNY
+  USD: 1.2671
+
+china:                # provider price list (given by Mengke, 2026-10-01)
+  p1:      {unit: core_hour, rate: 0.1, currency: CNY}
+  "9242":  {unit: core_hour, rate: 0.1, currency: CNY}
+  48cp1:   {unit: core_hour, rate: 0.1, currency: CNY}
+  48cp2:   {unit: core_hour, rate: 0.1, currency: CNY}
+  48cp3:   {unit: core_hour, rate: 0.1, currency: CNY}
+  v100:    {unit: gpu_hour,  rate: 1.0, currency: CNY}
+  v100g32: {unit: gpu_hour,  rate: 1.0, currency: CNY}
+
+vanda:                # NUS IT chargeback, "REC Roadshow 2026 - HPC briefing" (Jul 2026), p.22
+  batch_cpu:    {unit: core_hour, rate: 0.01, currency: SGD}
+  batch_gpu:    {unit: gpu_hour,  rate: 0.6,  currency: SGD}
+  cpu_parallel: {unit: core_hour, rate: 0.0,  currency: SGD}   # free queue
+  gpu:          {unit: gpu_hour,  rate: 0.0,  currency: SGD}   # free queue
+
+hopper:               # same source; H100 and H200 share one rate
+  h100: {unit: gpu_hour, rate: 2.5, currency: SGD}
+  h200: {unit: gpu_hour, rate: 2.5, currency: SGD}
+
+fornax:               # group-owned -> average market rental price for the same configuration
+  genoa:    {unit: core_hour, rate: 0.0513, currency: USD}  # AWS c7a (EPYC Genoa, 1 vCPU = 1 core), us-east-1 on-demand, Jul 2026
+  largemem: {unit: core_hour, rate: 0.0513, currency: USD}  # same CPU-class reference
+  rtx5090:  {unit: gpu_hour,  rate: 0.43,   currency: USD}  # median RTX 5090 32GB rental across ~100 cloud listings (computeprices.com, Jul 2026)

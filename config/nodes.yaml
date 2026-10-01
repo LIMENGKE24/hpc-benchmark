@@ -1,4 +1,4 @@
-# Partition inventory, collected 2026-10-01. Hardware is re-checked from job logs (lscpu / nvidia-smi).
+# Partition inventory, collected 2026-10-01. Tianjin Region 1 is excluded by decision. Hardware is re-checked from job logs (lscpu / nvidia-smi).
 china:                       # Slurm, ssh alias `china` (hpc.chinahpc.com:1014), account dengzy
   scheduler: slurm
   workdir: /ssd/work/limengke/hpc-benchmark
@@ -8,8 +8,8 @@ china:                       # Slurm, ssh alias `china` (hpc.chinahpc.com:1014),
     48cp1:   {kind: cpu, cores: 48, mem_gb: 190, cpu: "Xeon Platinum 8163"}
     48cp2:   {kind: cpu, cores: 48, mem_gb: 190, cpu: "Xeon Platinum 8255C"}
     48cp3:   {kind: cpu, cores: 48, mem_gb: 190, cpu: "Xeon Platinum 8168"}
-    v100:    {kind: gpu, cores: 24, gpus: 8, gpu: "V100 16GB SXM2", mem_gb: 250}
-    v100g32: {kind: gpu, cores: 24, gpus: 8, gpu: "V100 32GB SXM2", mem_gb: 250}
+    v100:    {kind: gpu, cores: 24, gpus: 8, gpu: "V100 16GB SXM2", mem_gb: 250, vasp_gpu: true}
+    v100g32: {kind: gpu, cores: 24, gpus: 8, gpu: "V100 32GB SXM2", mem_gb: 250, vasp_gpu: true}
   vasp:
     cpu: "module load vasp-intel2024.2/6.5.1"
     gpu: "module load vasp/6.5.1-nvhpc"
@@ -32,7 +32,14 @@ fornax:                      # PBS Pro, queue-routed, no project code, max 72 h
   partitions:
     genoa:    {kind: cpu, cores: 64, mem_gb: 384, select: "select=1:ncpus=64:mpiprocs=64", place: excl}
     largemem: {kind: cpu, cores: 128, mem_gb: 512, select: "select=1:ncpus=128:mpiprocs=128", place: excl}
-    rtx5090:  {kind: gpu, cores: 32, gpus: 1, gpu: "RTX 5090 32GB", select: "select=1:ncpus=32", place: excl}
+    rtx5090:  {kind: gpu, cores: 32, gpus: 1, gpu: "RTX 5090 32GB", select: "select=1:ncpus=32", place: excl, vasp_gpu: true}
   vasp:
     cpu: "module load vasp/vasp.6.5.1"
     gpu: "module load vasp/vasp.6.5.1_nvhpc"
+
+hopper:                      # PBS Pro, project CFP03-CF-027, -q auto. MACE only (no VASP on hopper)
+  scheduler: pbs
+  workdir: /scratch/limengke/hpc-benchmark
+  partitions:              # 8 GPUs, 112 cores, 2 TB per node; selected via gpu_model
+    h100: {kind: gpu, gpus: 8, gpu: "H100", nodes: 4,  select: "select=1:ncpus=8:ngpus=1:mem=32gb:gpu_model=H100", vasp: false}
+    h200: {kind: gpu, gpus: 8, gpu: "H200", nodes: 40, select: "select=1:ncpus=8:ngpus=1:mem=32gb:gpu_model=H200", vasp: false}

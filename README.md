@@ -1,11 +1,11 @@
 # HPC Benchmark — time vs. cost Pareto front
 
-Benchmark every CPU and GPU node type we can use on **China HPC (超算云平台)**, **vanda** and **fornax**
+Benchmark every CPU and GPU node type we can use on **China HPC (超算云平台)**, **vanda**, **fornax** and
+**hopper** (MACE only)
 with *identical* VASP and MACE-MD workloads, then plot **time-to-solution vs. cost per job** to find the
 Pareto-optimal nodes (fastest for a given cost / cheapest for a given speed).
 
-> Status: **preliminary plan (2026-10-01)** — nothing has been run yet. Items marked **TODO** / **DECIDE**
-> need input before production runs.
+> Status: **plan v2 (2026-10-01)** — decisions and prices fixed (§4, §7); nothing has been run yet.
 
 ---
 
@@ -27,10 +27,12 @@ Collected 2026-10-01 from `sinfo` / `pbsnodes` / `qstat -Q`. Full machine-readab
 | fornax | `genoa` | AMD EPYC (Genoa), 64 c, 384–512 GB | CPU | CPU |
 | fornax | `largemem` | 128 c, 512 GB | CPU | CPU |
 | fornax | `rtx5090` | 1× RTX 5090 32 GB, 32 c, 64 GB | GPU (nvhpc) | GPU |
+| hopper | `h100` (4 nodes) | 8× H100, 112 c, 2 TB | — (no VASP on hopper) | GPU |
+| hopper | `h200` (40 nodes) | 8× H200, 112 c, 2 TB | — (no VASP on hopper) | GPU |
 
 Not included (no access from our account / disabled): China `p1shr`, `fat`, `fat2`, `v100g32fat`
 (we are not in those Slurm groups); fornax `v100` (queue stopped), `dev`; vanda `large_mem` (ACL).
-Tianjin Region 1 (`tj1.chinahpc.com`) uses a separate key — **optional phase 2**.
+Tianjin Region 1 is **excluded**. vanda A40 has no GPU VASP build, so it runs MACE only.
 
 Exact CPU/GPU models are **recorded automatically** by every job (`lscpu`, `nvidia-smi`), so the table
 above will be corrected from real job output.
@@ -53,9 +55,10 @@ fornax, so results are directly relevant).
 | k-points | Γ-centred 2×2×2 |
 | Fixed work | `NSW = 0`, `NELMIN = NELM = 25`, `EDIFF = 1E-10` → exactly 25 SCF steps on every machine |
 | Output | `LWAVE = LCHARG = .FALSE.` (no I/O noise) |
-| Parallel | 1 full node, all physical cores, `KPAR = 1`, `NCORE = 4` (CPU); 1 rank/GPU, `NCORE = 1` (GPU) |
+| Parallel | CPU: 1 full node, all physical cores, `KPAR = 1`, `NCORE = 4`. GPU (China `v100`/`v100g32`, fornax `rtx5090`): **1 GPU, 1 MPI rank**, `NCORE = 1`, `KPAR = 1` |
 | Metric | `Elapsed time` from OUTCAR + energy check (all sites must agree to < 1 meV/atom) |
 
+Optional **W1-8GPU**: full China V100 node (8 ranks, `KPAR = 4`) to see multi-GPU scaling.
 Optional **W1-large**: 3×3×3 supercell (432 atoms, Γ-only) to test scaling on fat nodes / multi-GPU.
 
 ### W2 — MACE MD (fixed work)
@@ -68,6 +71,8 @@ Optional **W1-large**: 3×3×3 supercell (432 atoms, Γ-only) to test scaling on
 | Sizes | **S**: 4×4×4 = 1 024 atoms; **L**: 10×10×10 = 16 000 atoms (GPU only) |
 | Steps | 200 warm-up (untimed) + 2 000 timed (GPU); 20 + 100 timed (CPU, size S only) |
 | Parallel | GPU: 1 GPU, 8 CPU threads; CPU: full node, `torch.set_num_threads(cores)` |
+| GPUs | China V100 ×2 types, vanda A40, fornax RTX 5090, **hopper H100 and H200** |
+| Variant | **W2-cueq** (optional): same run with cuEquivariance kernels on GPUs that support them (A40, RTX 5090, H100, H200; V100 likely unsupported) |
 | Metric | timed steps/s → **ns/day** and **time for 1 ns** |
 
 ### Repetition & fairness rules
@@ -80,7 +85,7 @@ Optional **W1-large**: 3×3×3 supercell (432 atoms, Γ-only) to test scaling on
 
 ---
 
-## 3. Keeping software identical across the three clusters
+## 3. Keeping software identical across clusters
 
 ### VASP
 
@@ -98,9 +103,9 @@ Optional **W1-large**: 3×3×3 supercell (432 atoms, Γ-only) to test scaling on
 - One environment spec ([`envs/mace-bench.yaml`](envs/mace-bench.yaml)): Python 3.11, **torch 2.8.0 + cu128**,
   mace-torch 0.3.15, ase 3.25.
   - torch 2.8 cu128 wheels cover V100 (sm_70), A40 (sm_86) and RTX 5090 (sm_120). CUDA 13 wheels dropped
-    Volta, so we must **not** use the cu130 build fornax currently uses. **TODO: verify on all three GPU types.**
+    Volta, so we must **not** use the cu130 build fornax currently uses. H100/H200 (sm_90) are also covered. **TODO: verify on every GPU type.**
 - **China HPC has no outbound internet** (no PyPI access) → build once on vanda, `conda-pack` it, `scp`
-  the tarball to fornax and China, unpack to the same relative path.
+  the tarball to fornax, hopper and China, unpack to the same relative path.
 - `inputs/mace/fingerprint.py` prints versions + model md5 + reference energy/forces for a fixed
   structure; the outputs must agree across sites before any timing runs.
 
@@ -108,17 +113,26 @@ Optional **W1-large**: 3×3×3 supercell (432 atoms, Γ-only) to test scaling on
 
 ## 4. Cost model
 
-`cost_per_job = rate(unit · h) × units_used × wall_hours`, all converted to **SGD** — rates live in
-[`config/pricing.yaml`](config/pricing.yaml). **All rates are TODO.**
+`cost_per_job = rate × units_used × wall_hours`, converted to **SGD**. Rates:
+[`config/pricing.yaml`](config/pricing.yaml). FX (2026-09-13): 1 CNY = 0.189 SGD, 1 USD = 1.267 SGD.
 
-| Site | Charging unit | Source of rate |
-|---|---|---|
-| China HPC | credits per core-hour (CPU) / per GPU-hour, per partition | portal price list (CNY → SGD) |
-| vanda | SU per core-hour / GPU-hour (`queue_charge_rate`) | NUS HPC rate card / `hpc project` |
-| fornax | group-owned | **DECIDE**: amortised hardware cost, or treat as 0 and report separately |
+| Site | Resource | Rate | ≈ SGD | Source |
+|---|---|---|---|---|
+| China HPC | CPU (all partitions) | 0.1 CNY / core-h | 0.0189 / core-h | provider price |
+| China HPC | V100 (16 / 32 GB) | 1 CNY / GPU-h | 0.189 / GPU-h | provider price |
+| vanda | CPU | 0.01 SGD / core-h | 0.010 / core-h | NUS IT chargeback (Jul 2026 briefing) |
+| vanda | A40 | 0.6 SGD / GPU-h | 0.60 / GPU-h | NUS IT chargeback |
+| vanda | free queues (`cpu_parallel`, `gpu`) | 0 | 0 | plotted as "free" |
+| hopper | H100 / H200 | 2.5 SGD / GPU-h | 2.50 / GPU-h | NUS IT chargeback |
+| fornax | CPU (`genoa`, `largemem`) | 0.0513 USD / core-h | 0.065 / core-h | market avg: AWS c7a (EPYC Genoa) on-demand |
+| fornax | RTX 5090 | 0.43 USD / GPU-h | 0.545 / GPU-h | market median of RTX 5090 cloud rentals |
 
-Note: vanda's `cpu_parallel` and `gpu` queues have `queue_charge_rate = 0` (free, but capped at
-160 cores / 36 cores + 2 GPUs). They can go on the plot as zero-cost reference points.
+Rules:
+- CPU jobs are charged for **all cores of the node** we request (full node, exclusive).
+- GPU jobs are charged **per GPU only**; host cores are included (as on every price list above).
+- fornax is group-owned, so it is priced at the **average market rental price for the same hardware**.
+  Cloud CPU prices are much higher than university rates, so fornax CPU will look expensive on the plot.
+  This is a known effect of the pricing method, not of the hardware.
 
 ---
 
@@ -137,10 +151,10 @@ Note: vanda's `cpu_parallel` and `gpu` queues have `queue_charge_rate = 0` (free
 |---|---|---|---|
 | 0 | Access + inventory of all partitions | all | ✅ done (2026-10-01) |
 | 1 | Build structures, POTCAR, INCAR; record md5s | vanda | ⬜ |
-| 2 | Build `mace-bench` env, conda-pack, distribute | vanda → fornax, China | ⬜ |
+| 2 | Build `mace-bench` env, conda-pack, distribute | vanda → fornax, hopper, China | ⬜ |
 | 3 | Run `fingerprint.py` on one node per GPU type + CPU; confirm identical energies | all | ⬜ |
 | 4 | Smoke test: 1 short run per partition (W1 with NELM=3, W2 with 50 steps) | all | ⬜ |
-| 5 | Fill in `pricing.yaml` | — | ⬜ |
+| 5 | Fill in `pricing.yaml` | — | ✅ done (2026-10-01) |
 | 6 | Production: 3 replicates × all partitions × W1/W2 | all | ⬜ |
 | 7 | Collect results, plot Pareto front, write summary | local | ⬜ |
 
@@ -149,13 +163,14 @@ W2 ≈ < 0.5 GPU-h per run. Small enough to finish in about 1 week including que
 
 ---
 
-## 7. Open decisions
+## 7. Decisions (2026-10-01)
 
-1. **System**: c-Na₃PS₄ OK, or use a different group system (e.g. a MOF or slab)?
-2. **fornax cost**: amortised hardware cost or zero?
-3. **VASP GPU** on V100 / RTX 5090: include? (Consumer RTX 5090 FP64 is weak — useful as a data point.)
-4. **Tianjin Region 1**: include in phase 1 or later?
-5. **Multi-node** scaling (2–4 nodes) — out of scope for v1?
+1. System: **c-Na₃PS₄** ✅
+2. fornax cost: **average market rental price for the same hardware** ✅
+3. VASP GPU: **yes**, on fornax RTX 5090 and China V100 / V100-32G ✅
+4. Tianjin Region 1: **excluded** ✅
+5. hopper H100 / H200: **included for MACE only** (no VASP) ✅
+6. Still open: multi-node scaling (2–4 nodes) — out of scope for v1 unless requested.
 
 ---
 
@@ -163,7 +178,7 @@ W2 ≈ < 0.5 GPU-h per run. Small enough to finish in about 1 week including que
 
 ```
 config/nodes.yaml        partition inventory + scheduler resource strings
-config/pricing.yaml      cost rates (TODO)
+config/pricing.yaml      cost rates + sources
 envs/mace-bench.yaml     pinned MACE environment
 inputs/vasp/             INCAR, KPOINTS (POSCAR/POTCAR generated in step 1)
 inputs/mace/             bench_md.py, fingerprint.py
