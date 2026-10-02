@@ -1,0 +1,15 @@
+{
+  "tag": "fornax/largemem/W1-smoke/rep1",
+  "workload": "vasp_scf",
+  "units_used": 128.0,
+  "time_s": 27.395,
+  "elapsed_s": 41.221,
+  "loop_s_per_scf": 7.9812,
+  "n_scf": 3,
+  "natoms": 128,
+  "toten_eV": -466.1110187,
+  "toten_eV_per_atom": -3.64149233359375,
+  "vasp_version": "vasp.6.5.1",
+  "mpi_ranks": 128,
+  "host": "fornax-c05"
+}

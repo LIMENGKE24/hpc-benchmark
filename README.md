@@ -5,7 +5,7 @@ Benchmark every CPU and GPU node type we can use on **China HPC (超算云平台
 with *identical* VASP and MACE-MD workloads, then plot **time-to-solution vs. cost per job** to find the
 Pareto-optimal nodes (fastest for a given cost / cheapest for a given speed).
 
-> Status (2026-10-01): inputs + env validated on all 4 clusters; **production runs submitted** (81 jobs). See §8 for findings.
+> Status (2026-10-02): **complete** — all partitions benchmarked, 3 runs each. Results in §9, setup findings in §8.
 
 ---
 
@@ -26,7 +26,7 @@ Collected 2026-10-01 from `sinfo` / `pbsnodes` / `qstat -Q`. Full machine-readab
 | vanda | `batch_gpu` (gn-a40-*) | 2× A40 48 GB | — (no GPU VASP build) | GPU |
 | fornax | `genoa_9354` (c16–c20; c15 excluded) | 2× AMD EPYC 9354, 64 c, 384 GB | CPU | — |
 | fornax | `genoa_7543` (c13) | 2× AMD EPYC 7543, 64 c, 512 GB | CPU | — |
-| fornax | `largemem` | 128 c, 512 GB | CPU | — |
+| fornax | `largemem` | 2× AMD EPYC 7742, 128 c, 512 GB | CPU | — |
 | fornax | `rtx5090` | 1× RTX 5090 32 GB, 32 c, 64 GB | GPU (nvhpc) | GPU |
 | hopper | `h100` (4 nodes) | 8× H100, 112 c, 2 TB | — (no VASP on hopper) | GPU |
 | hopper | `h200` (40 nodes) | 8× H200, 112 c, 2 TB | — (no VASP on hopper) | GPU |
@@ -156,8 +156,8 @@ Rules:
 | 3 | Run `fingerprint.py` on one node per GPU type + CPU; confirm identical energies | all | ✅ A40/RTX5090/H100/H200/V100 agree to 1e-13 eV |
 | 4 | Smoke test: 1 short run per partition (W1 with NELM=3, W2 with 20 steps) | all | ✅ |
 | 5 | Fill in `pricing.yaml` | — | ✅ done (2026-10-01) |
-| 6 | Production: 3 replicates × all partitions × W1/W2 | all | 🔄 submitted 2026-10-01 (fornax CPU pending node diagnosis) |
-| 7 | Collect results, plot Pareto front, write summary | local | 🔄 preliminary (§9) |
+| 6 | Production: 3 replicates × all partitions × W1/W2 | all | ✅ 2026-10-02 |
+| 7 | Collect results, plot Pareto front, write summary | local | ✅ (§9) |
 
 Rough compute budget: W1 ≈ 0.2–1 node-h per run → ~12 partitions × 3 reps ≈ 20 node-h;
 W2 ≈ < 0.5 GPU-h per run. Small enough to finish in about 1 week including queue time.
@@ -181,7 +181,7 @@ W2 ≈ < 0.5 GPU-h per run. Small enough to finish in about 1 week including que
 - **fornax GPU nodes do not mount `/scratch`** → fornax runs from `/home/li.mengke/hpc-benchmark`.
 - **fornax `genoa` queue is heterogeneous**: `fornax-c13` = AMD EPYC 7543 (Milan), `fornax-c15…c20` = EPYC 9354 (Genoa).
   Stock `vasp/vasp.6.5.1` (Intel 2019): 3.7–4.2 s/SCF on c16/c18 (fastest CPU nodes measured), 6.4 s on c13,
-  but ~30 s on **c15** (twice, alone on the node; `MKL_DEBUG_CPU_TYPE=5` no help) → c15 excluded, likely a node fault.
+  but 22–34 s on **c15** (3 separate runs, alone on the node; `MKL_DEBUG_CPU_TYPE=5` no help) → c15 excluded; report to fornax admin.
   On the plot genoa is split into `genoa_9354` and `genoa_7543`.
 - **fornax node pinning**: use `vnode=fornax-cNN`; `host=` never matches CPU nodes (they register as `fornax-cNN-ib0`).
 - **vanda free `gpu` queue**: access denied for our account → dropped from the plan.
@@ -192,7 +192,7 @@ W2 ≈ < 0.5 GPU-h per run. Small enough to finish in about 1 week including que
 
 ---
 
-## 9. Results (2026-10-01, fornax CPU pending)
+## 9. Results (final, 2026-10-02)
 
 ![Pareto front](analysis/pareto.png)
 
@@ -203,11 +203,14 @@ Regenerate: `analysis/collect.sh && python analysis/pareto.py && python analysis
 
 | Partition | Time | Cost / job (SGD) | Runs | Pareto |
 |---|---|---|---|---|
+| `fornax/genoa_9354` | 104 | 0.121 | 3 | ★ |
 | `china/v100` | 138 | 0.00724 | 3 | ★ |
 | `china/v100g32` | 145 | 0.00762 | 3 |  |
 | `vanda/batch_cpu` | 148 | 0.0297 | 3 |  |
 | `china/9242` | 161 | 0.0813 | 3 |  |
+| `fornax/genoa_7543` | 174 | 0.201 | 3 |  |
 | `fornax/rtx5090` | 189 | 0.0286 | 3 |  |
+| `fornax/largemem` | 198 | 0.458 | 3 |  |
 | `china/48cp2` | 319 | 0.0805 | 3 |  |
 | `china/48cp3` | 326 | 0.0821 | 3 |  |
 | `china/48cp1` | 334 | 0.0841 | 3 |  |
@@ -235,9 +238,11 @@ Regenerate: `analysis/collect.sh && python analysis/pareto.py && python analysis
 | `china/v100g32` | 43.3 | 8.18 | 3 |  |
 | `vanda/batch_gpu` | 47 | 28.2 | 3 |  |
 
-**Takeaways (preliminary)**
-- **VASP**: China `v100` (1 GPU, nvhpc build) is both fastest and cheapest for this 128-atom SCF.
-  Among CPU nodes, vanda (72 c) is fastest and ~3× cheaper per job than any China CPU partition.
+**Takeaways**
+- **VASP**: two Pareto points. **Fastest: fornax `genoa_9354`** (EPYC 9354, 64 c; 104 s) — but it is priced at
+  AWS on-demand rates (0.12 SGD/job). **Cheapest: China `v100`** (1 GPU, nvhpc build; 138 s, 0.007 SGD/job, ~17× cheaper).
+  Best university-rate CPU option: vanda (148 s, 0.03 SGD). China CPU partitions are 2–3× slower at ~0.08 SGD.
+  fornax `largemem` (EPYC 7742, 128 c) is slower than the 64-core genoa nodes (198 s).
 - **MACE**: fornax RTX 5090 is fastest at both sizes; China V100 is cheapest.
   H100/H200 are about as fast as the RTX 5090 but ~5× the cost per ns (no cuEquivariance; small systems).
 - MACE MD is benchmarked on GPUs only (CPU nodes dropped from W2 on 2026-10-01).

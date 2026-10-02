@@ -1,0 +1,15 @@
+{
+  "tag": "fornax/genoa_7543/W1/rep3",
+  "workload": "vasp_scf",
+  "units_used": 64.0,
+  "time_s": 173.9125,
+  "elapsed_s": 186.238,
+  "loop_s_per_scf": 4.4646,
+  "n_scf": 25,
+  "natoms": 128,
+  "toten_eV": -526.017345,
+  "toten_eV_per_atom": -4.1095105078125,
+  "vasp_version": "vasp.6.5.1",
+  "mpi_ranks": 64,
+  "host": "fornax-c13"
+}

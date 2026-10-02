@@ -1,0 +1,15 @@
+{
+  "tag": "fornax/largemem/W1/rep2",
+  "workload": "vasp_scf",
+  "units_used": 128.0,
+  "time_s": 197.9607,
+  "elapsed_s": 211.712,
+  "loop_s_per_scf": 5.0722,
+  "n_scf": 25,
+  "natoms": 128,
+  "toten_eV": -526.017345,
+  "toten_eV_per_atom": -4.1095105078125,
+  "vasp_version": "vasp.6.5.1",
+  "mpi_ranks": 128,
+  "host": "fornax-c05"
+}
