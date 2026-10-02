@@ -1,11 +1,28 @@
-# Cost rates. cost_per_job = rate * units_used * wall_hours * fx_to_sgd[currency].
-# unit: core_hour (cores charged) | gpu_hour (GPUs charged; host cores included).
-fx_to_sgd:            # 2026-09-13 spot (valutafx / longforecast)
+# Cost rates used by analysis/pareto.py:
+#   cost = rate * units_used * wall_hours * fx_to_sgd[currency]
+# unit: core_hour (all cores of the node are charged) | gpu_hour (per GPU; host cores included).
+#
+# Sources
+#   China HPC : provider price list (超算云平台), as billed to the dengzy account, Oct 2026.
+#   vanda,    : NUS IT chargeback rates, "REC Roadshow 2026 – Central HPC/AI Infrastructure Briefing",
+#   hopper      slide 22 (July 2026). https://nusit.nus.edu.sg/hpc/hpc-gpu-systems/
+#   fornax    : the group's OWN server (no chargeback). Priced at public-cloud on-demand rates for
+#               equivalent hardware so it can sit on the same cost axis:
+#               - CPU: AWS EC2 c7a (4th-gen AMD EPYC "Genoa"), us-east-1 on-demand, USD 0.0513 per vCPU-hour
+#                 (1 vCPU = 1 physical core on c7a; July 2026)
+#                 https://www.economize.cloud/resources/aws/pricing/ec2/c7a.16xlarge/
+#               - RTX 5090: median of ~100 RTX 5090 32 GB cloud listings, USD 0.43 per GPU-hour (July 2026)
+#                 https://computeprices.com/providers/gpu/gpus/rtx5090 ; https://gpuperhour.com/rent/rtx-5090
+#               This is a replacement-cost proxy, not what the group pays.
+#   FX        : 2026-09-13 spot. 1 SGD = 5.2856 CNY (https://longforecast.com/sgd-cny);
+#               1 USD = 1.2671 SGD (https://longforecast.com/singapore-dollar-forecast-2017-2018-2019-2020-2021-usd-to-sgd)
+
+fx_to_sgd:
   SGD: 1.0
-  CNY: 0.189          # 1 SGD = 5.2856 CNY
+  CNY: 0.189
   USD: 1.2671
 
-china:                # provider price list (given by Mengke, 2026-10-01)
+china:
   p1:      {unit: core_hour, rate: 0.1, currency: CNY}
   "9242":  {unit: core_hour, rate: 0.1, currency: CNY}
   48cp1:   {unit: core_hour, rate: 0.1, currency: CNY}
@@ -14,19 +31,16 @@ china:                # provider price list (given by Mengke, 2026-10-01)
   v100:    {unit: gpu_hour,  rate: 1.0, currency: CNY}
   v100g32: {unit: gpu_hour,  rate: 1.0, currency: CNY}
 
-vanda:                # NUS IT chargeback, "REC Roadshow 2026 - HPC briefing" (Jul 2026), p.22
-  batch_cpu:    {unit: core_hour, rate: 0.01, currency: SGD}
-  batch_gpu:    {unit: gpu_hour,  rate: 0.6,  currency: SGD}
-  cpu_parallel: {unit: core_hour, rate: 0.0,  currency: SGD}   # free queue
-  gpu:          {unit: gpu_hour,  rate: 0.0,  currency: SGD}   # free queue
+vanda:
+  batch_cpu: {unit: core_hour, rate: 0.01, currency: SGD}
+  batch_gpu: {unit: gpu_hour,  rate: 0.6,  currency: SGD}   # A40
 
-hopper:               # same source; H100 and H200 share one rate
+hopper:                                                      # H100 and H200 share one rate
   h100: {unit: gpu_hour, rate: 2.5, currency: SGD}
   h200: {unit: gpu_hour, rate: 2.5, currency: SGD}
 
-fornax:               # group-owned -> average market rental price for the same configuration
-  genoa:    {unit: core_hour, rate: 0.0513, currency: USD}  # AWS c7a (EPYC Genoa, 1 vCPU = 1 core), us-east-1 on-demand, Jul 2026
-  genoa_9354: {unit: core_hour, rate: 0.0513, currency: USD}  # genoa queue, EPYC 9354 nodes c16-c20 (c15 excluded: anomalously slow)
+fornax:                                                      # own server -> cloud proxy rates (see header)
+  genoa_9354: {unit: core_hour, rate: 0.0513, currency: USD}  # genoa queue, EPYC 9354 nodes c16-c20 (c15 excluded)
   genoa_7543: {unit: core_hour, rate: 0.0513, currency: USD}  # genoa queue, EPYC 7543 node c13
-  largemem: {unit: core_hour, rate: 0.0513, currency: USD}  # same CPU-class reference
-  rtx5090:  {unit: gpu_hour,  rate: 0.43,   currency: USD}  # median RTX 5090 32GB rental across ~100 cloud listings (computeprices.com, Jul 2026)
+  largemem:   {unit: core_hour, rate: 0.0513, currency: USD}  # EPYC 7742; same CPU-class proxy
+  rtx5090:    {unit: gpu_hour,  rate: 0.43,   currency: USD}

@@ -1,38 +1,42 @@
 #!/usr/bin/env python3
-"""Markdown table per workload: median time, cost per job, n runs, Pareto flag. Usage: python analysis/summary.py"""
+"""Markdown results tables (one per workload): median time with min–max, cost, Pareto flag.
 
-from collections import defaultdict
-from statistics import median
+Usage: python analysis/summary.py   (prints Markdown; paste into README)
+"""
 
 import yaml
 
-from pareto import ROOT, cost_sgd, load_results, pareto_front
+from pareto import BENCH_ORDER, LABELS, ROOT, aggregate, pareto_front
 
-UNITS = {"W1": "s (25 SCF, LOOP+)", "W2-S": "h per ns (1 024 atoms)", "W2-L": "h per ns (3 456 atoms)"}
+TITLE = {"W1": "VASP — 128-atom Na₃PS₄, 25 SCF steps", "W2-S": "MACE MD — 1,024 atoms", "W2-L": "MACE MD — 3,456 atoms"}
+HARDWARE = {
+    "china/p1": "2× Xeon Gold 6138 (40 c)", "china/9242": "2× Xeon Platinum 9242 (96 c)",
+    "china/48cp1": "Xeon Platinum 8163 (48 c)", "china/48cp2": "Xeon Platinum 8255C (48 c)",
+    "china/48cp3": "Xeon Platinum 8168 (48 c)", "china/v100": "1× V100 SXM2 16 GB", "china/v100g32": "1× V100 SXM2 32 GB",
+    "vanda/batch_cpu": "2× Xeon Platinum 8452Y (72 c)", "vanda/batch_gpu": "1× A40 48 GB",
+    "fornax/genoa_9354": "2× EPYC 9354 (64 c)", "fornax/genoa_7543": "2× EPYC 7543 (64 c)",
+    "fornax/largemem": "2× EPYC 7742 (128 c)", "fornax/rtx5090": "1× RTX 5090 32 GB",
+    "hopper/h100": "1× H100 80 GB", "hopper/h200": "1× H200 141 GB",
+}
+
+
+def fmt(v: float) -> str:
+    return f"{v:.3g}" if v < 100 else f"{v:,.0f}"
 
 
 def main() -> None:
     pricing = yaml.safe_load((ROOT / "config" / "pricing.yaml").read_text())
-    groups = defaultdict(list)
-    for r in load_results():
-        r["cost"] = cost_sgd(r, pricing)
-        groups[(r["bench"], f'{r["site"]}/{r["partition"]}')].append(r)
-
-    for bench in sorted({b for b, _ in groups}):
-        rows = []
-        for (b, label), runs in groups.items():
-            if b != bench:
-                continue
-            t = median(r["time_s"] for r in runs)
-            c = median(r["cost"] for r in runs if r["cost"] is not None)
-            rows.append((t, c, label, len(runs)))
-        front = {p[2] for p in pareto_front([(t, c, lab) for t, c, lab, _ in rows])}
-        scale = 1 if bench == "W1" else 3600
-        print(f"\n**{bench}** — time in {UNITS.get(bench, 's')}\n")
-        cost_hdr = "Cost / job (SGD)" if bench == "W1" else "Cost / ns (SGD)"
-        print(f"| Partition | Time | {cost_hdr} | Runs | Pareto |\n|---|---|---|---|---|")
-        for t, c, label, n in sorted(rows):
-            print(f"| `{label}` | {t / scale:.3g} | {c:.3g} | {n} | {'★' if label in front else ''} |")
+    data = aggregate(pricing)
+    for bench in [b for b in BENCH_ORDER if b in data]:
+        pts = data[bench]
+        front = {p[2] for p in pareto_front([(p["t"], p["c"], p["label"]) for p in pts])}
+        div, tunit, cunit = (1, "s", "job") if bench == "W1" else (3600, "h / ns", "ns")
+        print(f"\n**{TITLE[bench]}** — sorted by time; ★ = Pareto-optimal\n")
+        print(f"| Node | Hardware (charged) | Time ({tunit}) median [min–max] | Cost per {cunit} (SGD) | |")
+        print("|---|---|---|---|---|")
+        for p in sorted(pts, key=lambda p: p["t"]):
+            t = f"{fmt(p['t'] / div)} [{fmt(p['t_lo'] / div)}–{fmt(p['t_hi'] / div)}]"
+            print(f"| {LABELS[p['label']]} | {HARDWARE[p['label']]} | {t} | {p['c']:.3g} | {'★' if p['label'] in front else ''} |")
 
 
 if __name__ == "__main__":
