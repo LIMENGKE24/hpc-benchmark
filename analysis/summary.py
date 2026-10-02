@@ -36,7 +36,8 @@ def main() -> None:
         print("|---|---|---|---|---|")
         for p in sorted(pts, key=lambda p: p["t"]):
             t = f"{fmt(p['t'] / div)} [{fmt(p['t_lo'] / div)}–{fmt(p['t_hi'] / div)}]"
-            print(f"| {LABELS[p['label']]} | {HARDWARE[p['label']]} | {t} | {p['c']:.3g} | {'★' if p['label'] in front else ''} |")
+            cost = f"{p['c']:.3g}" + ("\\*" if p["site"] == "fornax" else "")  # * = cloud-proxy price, see README footnote
+            print(f"| {LABELS[p['label']]} | {HARDWARE[p['label']]} | {t} | {cost} | {'★' if p['label'] in front else ''} |")
 
 
 if __name__ == "__main__":
